@@ -1,0 +1,11 @@
+tasks:
+  - name: Backend
+    before: |
+      cd back
+      yarn
+    command: yarn start
+  - name: FrontEnd
+    before: |
+      cd front
+      yarn
+    command: yarn start
