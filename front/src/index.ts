@@ -14,24 +14,32 @@ if (main && navBar) {
    navBar.appendChild(userRow);
 }
 
-socket.on('connect', () => {
-   console.log('Successfully connected!: %s', socket.id);
-});
-
-socket.on('usersList', users => {
-   userRow.innerHTML = '';
-   users.forEach(id => {
-      const userElem = document.createElement('div');
-      userElem.innerHTML = `${id}`;
-      userRow.appendChild(userElem);
-   });
-});
-
-socket.on('receiveMsg', (msg, id) => {
+function addMsg(msg, id, prep?: boolean) {
    const newMsg = document.createElement('div');
    newMsg.innerHTML = `
   <div>${id}</div>
   <div>${msg}</div>
   `;
+   if (prep) {
+      msgRow.prepend(newMsg);
+   }
    msgRow.appendChild(newMsg);
+}
+
+socket.on('connect', () => {
+   console.log('Successfully connected!: %s', socket.id);
+   socket.emit('chat', `${socket.id} has joined!`, 'Bot');
+   addMsg(`${socket.id} has joined!`, 'Bot');
+   socket.emit('fetchMsg');
 });
+
+socket.on('usersList', users => {
+   userRow.innerHTML = '';
+   users.forEach(user => {
+      const userElem = document.createElement('div');
+      userElem.innerHTML = `${user.username || user.id}`;
+      userRow.appendChild(userElem);
+   });
+});
+
+socket.on('receiveMsg', addMsg);

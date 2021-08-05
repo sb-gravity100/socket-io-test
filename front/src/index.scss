@@ -6,7 +6,8 @@
    &:focus {
       outline: none;
    }
-   &::before, &::after {
+   &::before,
+   &::after {
       box-sizing: border-box;
    }
 }
@@ -22,28 +23,28 @@ a {
 }
 
 #root {
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  align-items: stretch;
+   width: 100vw;
+   height: 100vh;
+   display: flex;
+   align-items: stretch;
 
-  .navbar {
-    height: 100%;
-    flex-basis: 300px;
-    color: #fff;
-    background: hsl(0, 0%, 7%);
-  }
+   .navbar {
+      height: 100%;
+      flex-basis: 300px;
+      color: #fff;
+      background: hsl(0, 0%, 7%);
+   }
 
-  .main {
-    background: whitesmoke;
-
-  }
+   .main {
+      background: whitesmoke;
+      flex-grow: 1;
+   }
 }
 
 @media screen and (max-width: 900px) {
-  #root {
-    .navbar {
-      flex-basis: 100px;
-    }
-  }
+   #root {
+      .navbar {
+         flex-basis: 100px;
+      }
+   }
 }
