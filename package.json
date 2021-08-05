@@ -21,10 +21,11 @@
       "@types/morgan": "^1.9.3",
       "@types/node": "^16.4.7",
       "nodemon": "^2.0.12",
+      "ts-node": "^10.1.0",
       "typescript": "^4.3.5"
    },
    "scripts": {
-      "start": "nodemon dist/",
+      "start": "nodemon src/index.ts",
       "compile": "tsc",
       "watch": "tsc -w"
    },
@@ -35,7 +36,6 @@
       },
       "ignore": [
          "/public",
-         "/src",
          "session.json",
          "/app",
          "/front"

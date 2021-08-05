@@ -1,11 +1,16 @@
 tasks:
-  - name: Backend
-    before: |
-      cd back
-      yarn
-    command: yarn start
-  - name: FrontEnd
-    before: |
-      cd front
-      yarn
-    command: yarn start
+   - name: Backend
+     init: yarn
+     command: yarn start
+   - name: FrontEnd
+     init: |
+        cd front
+        yarn
+     command: yarn start
+ports:
+   - port: 5000
+     visibility: public
+     onOpen: ignore
+   - port: 3000
+     visibility: public
+     onOpen: ignore

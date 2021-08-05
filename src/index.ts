@@ -8,12 +8,17 @@ import session from 'express-session';
 import cuid from 'cuid';
 import { Server } from 'socket.io';
 
+interface UserList {
+   id: string;
+   username?: string;
+}
+
 const { SERVER_PORT, NODE_ENV } = process.env;
 const isDev = NODE_ENV === 'development';
 const publicFolder = path.normalize(path.join(__dirname, '../public/'));
 const CWD = path.normalize(path.join(__dirname, '../'));
 const debug = _dbug('socket');
-const users: string[] = [];
+const users: UserList[] = [];
 
 async function boot() {
    debug('Initializing server...');
@@ -24,7 +29,9 @@ async function boot() {
    debug('Server listening at %s', SERVER_PORT);
 
    io.on('connection', socket => {
-      users.push(socket.id);
+      users.push({
+         id: socket.id,
+      });
       io.emit('usersList', users);
       socket.broadcast.emit('userJoin', socket.id);
       debug('Connected: %s', socket.id);
@@ -35,7 +42,7 @@ async function boot() {
 
       socket.on('disconnect', () => {
          socket.emit('userExit', socket.id);
-         const idIndex = users.findIndex(id => socket.id === id);
+         const idIndex = users.findIndex(user => socket.id === user.id);
          users.splice(idIndex, 1);
          io.emit('usersList', users);
 
