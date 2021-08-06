@@ -1,0 +1,12 @@
+@function isDark($color) {
+   @if lightness($color) > 60% {
+      @return #080808;
+   } @else {
+      @return #fff;
+   }
+}
+
+@mixin BGColor($bg: transparent) {
+   background: $bg;
+   color: isDark($bg);
+}
