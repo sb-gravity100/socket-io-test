@@ -10,43 +10,20 @@ import _MMStore from 'memorystore';
 import { Server } from 'socket.io';
 // import _ from 'lodash';
 import { exec, execSync } from 'child_process';
-
-interface UserList {
-   id: string;
-   username?: string;
-   joinedAt: Date;
-}
-
-interface MsgList {
-   id?: string;
-   msg: string;
-   createdAt: Date;
-}
-
+import { SocketEvents } from './events-map';
 const { SERVER_PORT, NODE_ENV } = process.env;
 const isDev = NODE_ENV === 'development';
 const publicFolder = path.normalize(path.join(__dirname, '../public/'));
 const CWD = path.normalize(path.join(__dirname, '../'));
 const debug = _dbug('socket');
 const MemoryStore = _MMStore(session);
-const users: UserList[] = [];
-const msgs: MsgList[] = [];
-const whitelist: string[] = [];
-whitelist.push(execSync('gp url 3000').toString().trim());
-
 async function boot() {
    debug('Initializing server...');
    const app = express();
    const server = http.createServer(app);
-   const io = new Server(server, {
+   const io = new Server<SocketEvents>(server, {
       cors: {
-         origin: function (origin, cb) {
-            if (whitelist.indexOf(origin || '') !== -1) {
-               cb(null, true);
-            } else {
-               cb(new Error('Not allowed by CORS'));
-            }
-         },
+         origin: [execSync('gp url 3000').toString().trim()],
       },
    });
    await new Promise((resolve: any) => server.listen(SERVER_PORT, resolve));
@@ -54,49 +31,15 @@ async function boot() {
 
    io.on('connection', socket => {
       const user = {
+         username: '',
          id: socket.id,
-         joinedAt: new Date(),
       };
-      users.push(user);
-      io.emit('usersList', users);
-      socket.broadcast.emit('userJoin', socket.id);
       debug('Connected: %s', socket.id);
 
-      socket.on('chat', (msg, id) => {
-         msgs.push({
-            msg,
-            id,
-            createdAt: new Date(),
-         });
-         socket.broadcast.emit('receiveMsg', msg, id);
+      socket.on('SET:username', username => {
+         user.username = username;
       });
-
-      socket.on('fetchMsg', () => {
-         // _.chain(msgs)
-         //    .orderBy('createdAt', 'desc')
-         //    .each(msgs => {
-         //       if (new Date(msgs.createdAt) < new Date(user.joinedAt)) {
-         //          socket.local.emit('receiveMsg', msgs.msg, msgs.id, true);
-         //       }
-         //    });
-         const newMsg = [...msgs];
-         newMsg
-            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-            .forEach(msg => {
-               if (new Date(msg.createdAt) < new Date(user.joinedAt)) {
-                  socket
-                     .in(socket.id)
-                     .emit('receiveMsg', msg.msg, msg.id, true);
-               }
-            });
-      });
-
       socket.on('disconnect', () => {
-         socket.emit('userExit', socket.id);
-         const idIndex = users.findIndex(user => socket.id === user.id);
-         users.splice(idIndex, 1);
-         io.emit('usersList', users);
-
          debug('Disconnected: %s', socket.id);
       });
    });

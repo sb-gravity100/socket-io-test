@@ -1,14 +1,16 @@
-import { combineReducers, createStore } from '@reduxjs/toolkit';
+import { configureStore } from '@reduxjs/toolkit';
+import * as ReactRedux from 'react-redux';
 import { testReducer } from './reducer/TestCount';
+import socketReducer from './reducer/SocketSlice';
 
-const reducers = combineReducers({
-   testReducer,
+export const store = configureStore({
+   reducer: {
+      tests: testReducer,
+      socket: socketReducer,
+   },
 });
-
-const store = createStore(
-   reducers,
-   (window as any)?.__REDUX_DEVTOOLS_EXTENSION__()
-);
 export type RootState = ReturnType<typeof store.getState>;
-
-export default store;
+export type RootDispatch = typeof store.dispatch;
+export const useDispatch = () => ReactRedux.useDispatch<RootDispatch>();
+export const useSelector: ReactRedux.TypedUseSelectorHook<RootState> =
+   ReactRedux.useSelector;

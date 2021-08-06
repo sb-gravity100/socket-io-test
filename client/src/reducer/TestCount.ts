@@ -1,24 +1,26 @@
-import { createAction, createReducer } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-export const Inc = createAction<number>('Inc');
-export const Dec = createAction<number>('Dec');
-export const Click = createAction<number>('Click');
-
-export const testReducer = createReducer(
-   {
-      counts: 0,
+const testSlice = createSlice({
+   name: 'tests',
+   initialState: {
       clicks: 0,
+      counts: 0,
    },
-   builder =>
-      builder
-         .addCase(Inc, (state, action) => {
-            state.counts += action.payload;
-         })
-         .addCase(Dec, (state, action) => {
-            state.counts -= action.payload;
-         })
-         .addCase(Click, (state, action) => {
-            state.clicks += 1;
-         })
-         .addDefaultCase(() => {})
-);
+   reducers: {
+      Inc: (state, action: PayloadAction<number | undefined>) => {
+         state.counts += action.payload || 1;
+      },
+      Dec: (state, action: PayloadAction<number | undefined>) => {
+         state.counts -= action.payload || 1;
+      },
+      Click: state => {
+         state.clicks += 1;
+      },
+   },
+});
+
+export const Click = testSlice.actions.Click;
+export const Inc = testSlice.actions.Inc;
+export const Dec = testSlice.actions.Dec;
+
+export const testReducer = testSlice.reducer;

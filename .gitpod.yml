@@ -1,12 +1,14 @@
 tasks:
-   - name: Backend
+   - name: Server
      init: yarn
      command: yarn start
-   - name: FrontEnd
+   - name: Client
      init: |
-        cd front
+        cd client
         yarn
-     command: yarn start
+     command: |
+        cd client
+        yarn start
 ports:
    - port: 5000
      visibility: public
