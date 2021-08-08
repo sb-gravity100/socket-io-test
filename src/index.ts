@@ -37,6 +37,7 @@ async function boot() {
       debug('Connected: %s', socket.id);
 
       socket.on('SET:username', username => {
+         debug('SET username %s for: %s', username, user.id);
          user.username = username;
       });
       socket.on('disconnect', () => {

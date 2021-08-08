@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface SocketState {
-   [key: string]: any;
    id: string;
    username: string;
 }
