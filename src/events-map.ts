@@ -8,9 +8,10 @@ type PrefixKeys<
    [Property in keyof T as `${K}:${string & Property}`]: T[Property];
 };
 type SetEvents = {
-   username: (name: string) => void;
+   username(name: string): void;
 };
 type PrefixedSetEvents = PrefixKeys<'SET', SetEvents>;
 export interface SocketEvents extends PrefixedSetEvents {
-   message: (...args: any[]) => void;
+   message(...args: any[]): void;
+   ping(n: number): void;
 }

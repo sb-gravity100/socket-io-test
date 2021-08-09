@@ -8,40 +8,74 @@ import session from 'express-session';
 import cuid from 'cuid';
 import _MMStore from 'memorystore';
 import { Server } from 'socket.io';
-// import _ from 'lodash';
-import { exec, execSync } from 'child_process';
+import { execSync } from 'child_process';
 import { SocketEvents } from './events-map';
+import _ from 'lodash';
+import Datastore from 'nedb-promises';
+
+interface IUserStore {
+   socketId: string;
+   username?: string;
+   _id?: string;
+}
+
 const { SERVER_PORT, NODE_ENV } = process.env;
 const isDev = NODE_ENV === 'development';
 const publicFolder = path.normalize(path.join(__dirname, '../public/'));
 const CWD = path.normalize(path.join(__dirname, '../'));
 const debug = _dbug('socket');
 const MemoryStore = _MMStore(session);
+const DB = Datastore.create({
+   autoload: true,
+   filename: path.join(CWD, 'data.db'),
+});
 async function boot() {
    debug('Initializing server...');
    const app = express();
+   const serverUrl = execSync('gp url 3000').toString().trim();
    const server = http.createServer(app);
    const io = new Server<SocketEvents>(server, {
       cors: {
-         origin: [execSync('gp url 3000').toString().trim()],
+         origin: [serverUrl, 'https://admin.socket.io'],
       },
+   });
+   // await DB.load();
+   await DB.remove(
+      {},
+      {
+         multi: true,
+      }
+   );
+   DB.ensureIndex({
+      fieldName: 'socketId',
+      unique: true,
    });
    await new Promise((resolve: any) => server.listen(SERVER_PORT, resolve));
    debug('Server listening at %s', SERVER_PORT);
 
    io.on('connection', socket => {
-      const user = {
+      socket.join('public');
+      const user: IUserStore = {
+         socketId: socket.id,
          username: '',
-         id: socket.id,
       };
-      debug('Connected: %s', socket.id);
+      DB.insert(user)
+         .then(_user => {
+            user._id = _user._id;
+            debug('Connected: %s', socket.id);
+         })
+         .catch(() => {});
 
       socket.on('SET:username', username => {
-         debug('SET username %s for: %s', username, user.id);
          user.username = username;
+         DB.update({ socketId: socket.id }, { username: username }).then(() => {
+            // debug('SET username %s for: %s', username, socket.id);
+         });
       });
-      socket.on('disconnect', () => {
+      socket.on('disconnect', async () => {
+         const s = await DB.remove({ _id: user._id }, {});
          debug('Disconnected: %s', socket.id);
+         debug('Removed %s users!', s);
       });
    });
 
@@ -49,7 +83,7 @@ async function boot() {
 }
 
 boot()
-   .then(({ app }) => {
+   .then(({ app, io }) => {
       app.use(
          logger(isDev ? 'dev' : 'common', {
             stream: {
@@ -85,4 +119,4 @@ boot()
          res.send('Hello World');
       });
    })
-   .catch(debug);
+   .catch(console.log);

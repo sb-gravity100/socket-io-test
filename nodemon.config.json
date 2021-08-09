@@ -3,7 +3,13 @@
       "DEBUG": "socket",
       "NODE_ENV": "development"
    },
-   "ignore": ["./public", "./session.json", "./package.json", "./client"],
+   "ignore": [
+      "./public",
+      "./session.json",
+      "./package.json",
+      "./client",
+      "./db.json"
+   ],
    "execMap": {
       "ts": "ts-node"
    },

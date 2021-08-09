@@ -9,6 +9,13 @@ import { setID } from './reducer/SocketSlice';
 
 socket.on('connect', () => {
    store.dispatch(setID(socket.id));
+   setInterval(() => {
+      socket.emit('ping', 2);
+      const username: { value?: string } = JSON.parse(
+         sessionStorage.getItem('user') || '{}'
+      );
+      if (username?.value) socket.emit('SET:username', username.value);
+   }, 2500);
 });
 
 ReactDOM.render(

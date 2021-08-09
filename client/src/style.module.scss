@@ -4,7 +4,7 @@ $form-padding: 0.5rem 0.3rem;
 
 .fixed_group {
    position: fixed;
-   top: 0;
+   bottom: 0;
    right: 0;
 }
 .setUsernameForm {
@@ -48,4 +48,21 @@ $form-padding: 0.5rem 0.3rem;
    font-size: 0.7rem;
    @include BGColor(crimson);
    grid-column: span 2;
+}
+.Header {
+   padding: 0.8rem 1rem;
+   @include BGColor(crimson);
+}
+
+.Header_logo {
+   font-size: 1.5rem;
+   font-weight: 500;
+   font-style: italic;
+}
+
+.Header_navbar {
+   display: flex;
+   gap: 10px;
+   justify-content: space-between;
+   align-items: center;
 }
