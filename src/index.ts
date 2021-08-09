@@ -1,4 +1,5 @@
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import http from 'http';
 import path from 'path';
@@ -54,7 +55,6 @@ async function boot() {
    debug('Server listening at %s', SERVER_PORT);
 
    io.on('connection', socket => {
-      socket.join('public');
       const user: IUserStore = {
          socketId: socket.id,
          username: '',
@@ -68,9 +68,14 @@ async function boot() {
 
       socket.on('SET:username', username => {
          user.username = username;
-         DB.update({ socketId: socket.id }, { username: username }).then(() => {
+         DB.update({ _id: user._id }, { username }).then(() => {
             // debug('SET username %s for: %s', username, socket.id);
          });
+      });
+      socket.on('SET:room', (id, cb) => {
+         socket.join(id);
+         debug('%s joined room: %s', user.username || socket.id);
+         if (cb) cb();
       });
       socket.on('disconnect', async () => {
          const s = await DB.remove({ _id: user._id }, {});

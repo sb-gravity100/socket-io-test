@@ -9,6 +9,7 @@ type PrefixKeys<
 };
 type SetEvents = {
    username(name: string): void;
+   room(id: string, cb?: () => any): void;
 };
 type PrefixedSetEvents = PrefixKeys<'SET', SetEvents>;
 export interface SocketEvents extends PrefixedSetEvents {

@@ -3,6 +3,7 @@
 
 import React, { FormEventHandler, useEffect } from 'react';
 import { useLocalStorage, useSessionStorage } from 'react-use';
+import AppRoom from './components/Chatroom';
 import Header from './components/Header';
 import { updateState } from './reducer/SocketSlice';
 import { socket } from './socket';
@@ -106,7 +107,7 @@ const App: React.FC = () => {
       }
    };
    return (
-      <div>
+      <>
          <div className={styles.fixed_group}>
             <h5>Current ID: {socketID}</h5>
             {username?.disable && <h5>Username: {username.value}</h5>}
@@ -120,8 +121,9 @@ const App: React.FC = () => {
                   usernameHandler={usernameHandler}
                />
             )}
+            <AppRoom />
          </main>
-      </div>
+      </>
    );
 };
 

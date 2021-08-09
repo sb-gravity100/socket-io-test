@@ -8,10 +8,11 @@
       "./session.json",
       "./package.json",
       "./client",
-      "./db.json"
+      "./db.json",
+      "./src"
    ],
    "execMap": {
       "ts": "ts-node"
    },
-   "watch": ["./src"]
+   "watch": ["./dist"]
 }

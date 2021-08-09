@@ -1,8 +1,3 @@
-{"username":"SocketGuy","_id":"iGwYDFzteODD7e2Q"}
-{"$$deleted":true,"_id":"iGwYDFzteODD7e2Q"}
-{"$$indexCreated":{"fieldName":"socketId","unique":true}}
-{"socketId":"vEQVKbsVweAPC5HUAAAB","username":"","_id":"m0k96hp65AX01IUw"}
-{"username":"SocketGuy","_id":"m0k96hp65AX01IUw"}
-{"$$deleted":true,"_id":"m0k96hp65AX01IUw"}
-{"socketId":"6zEfc6YsLZH2CV32AAAD","username":"","_id":"vUo8n7uvP1GIREdp"}
-{"username":"SocketGuy","_id":"vUo8n7uvP1GIREdp"}
+{"username":"User1","_id":"xakfa7f3G3UKzoH6"}
+{"$$indexCreated":{"fieldName":"socketId","unique":true,"sparse":false}}
+{"$$deleted":true,"_id":"xakfa7f3G3UKzoH6"}
