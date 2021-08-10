@@ -12,13 +12,9 @@ socket.on('connect', () => {
    socket.emit('SET:room', 'public', () => {
       store.dispatch(changeRoom('public'));
    });
-   setInterval(() => {
-      socket.emit('ping', 2);
-      const username: { value?: string } = JSON.parse(
-         sessionStorage.getItem('user') || '{}'
-      );
-      if (username?.value) socket.emit('SET:username', username.value);
-   }, 2500);
+   // setInterval(() => {
+   //    socket.emit('ping', 1);
+   // }, 1000);
 });
 
 ReactDOM.render(

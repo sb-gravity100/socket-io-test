@@ -1,0 +1,18 @@
+{
+   "env": {
+      "DEBUG": "socket",
+      "NODE_ENV": "development"
+   },
+   "ignore": [
+      "./public",
+      "./session.json",
+      "./package.json",
+      "./client",
+      "./db.json",
+      "./dist"
+   ],
+   "execMap": {
+      "ts": "ts-node"
+   },
+   "watch": ["./src"]
+}
