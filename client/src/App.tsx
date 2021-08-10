@@ -12,8 +12,6 @@ import styles from './style.module.scss';
 
 interface UserSession {
    value?: string;
-   disable?: boolean;
-   expires?: Date;
    error?: string[];
 }
 
@@ -39,7 +37,7 @@ const UsernameForm: React.FC<UsernameFormProps> = ({
             onChange={e =>
                setUsername({
                   ...username,
-                  value: e.target.value.trim(),
+                  value: e.target.value,
                   error: undefined,
                })
             }
@@ -56,25 +54,20 @@ const UsernameForm: React.FC<UsernameFormProps> = ({
 
 const App: React.FC = () => {
    const [username, setUsername] = useSessionStorage<UserSession>('user', {
-      disable: false,
       error: [],
    });
    useEffect(() => {
-      const now = new Date();
-      if (
-         username?.expires &&
-         new Date(username.expires).getTime() < now.getTime()
-      ) {
-         setUsername({
-            disable: false,
-            error: ['Username timeouted!'],
-         });
-      } else {
-         if (username?.value) {
-            socket.emit('SET:username', username.value);
-         }
+      if (username?.value) {
+         socket.emit('SET:username', username.value.trim(), () =>
+            dispatch(
+               updateState({
+                  key: 'username',
+                  value: username.value?.trim(),
+               })
+            )
+         );
       }
-   }, [setUsername, username?.expires]);
+   }, []);
    const socketID = useSelector(state => state.socket.id);
    const dispatch = useDispatch();
    const usernameHandler: FormEventHandler = e => {
@@ -84,21 +77,19 @@ const App: React.FC = () => {
          const now = new Date();
          setUsername({
             ...username,
-            disable: true,
-            expires: new Date(now.getTime() + 1000 * 60 * 60),
          });
-         socket.emit('SET:username', username?.value);
-         dispatch(
-            updateState({
-               key: 'username',
-               value: username.value,
-            })
+         socket.emit('SET:username', username?.value.trim(), () =>
+            dispatch(
+               updateState({
+                  key: 'username',
+                  value: username.value?.trim(),
+               })
+            )
          );
       } else {
          if (!username?.error?.find(e => e.match(/please supply a name/i))) {
             setUsername({
                ...username,
-               disable: false,
                error: username?.error
                   ? [...username.error, 'Please supply a name.']
                   : ['Please supply a name.'],
@@ -110,17 +101,15 @@ const App: React.FC = () => {
       <>
          <div className={styles.fixed_group}>
             <h5>Current ID: {socketID}</h5>
-            {username?.disable && <h5>Username: {username.value}</h5>}
+            {username?.value?.trim() && <h5>Username: {username.value}</h5>}
          </div>
          <Header />
          <main>
-            {!username?.disable && (
-               <UsernameForm
-                  username={username}
-                  setUsername={setUsername}
-                  usernameHandler={usernameHandler}
-               />
-            )}
+            <UsernameForm
+               username={username}
+               setUsername={setUsername}
+               usernameHandler={usernameHandler}
+            />
             <AppRoom />
          </main>
       </>

@@ -1,11 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
 import * as ReactRedux from 'react-redux';
-import { testReducer } from './reducer/TestCount';
 import socketReducer from './reducer/SocketSlice';
 
 export const store = configureStore({
    reducer: {
-      tests: testReducer,
       socket: socketReducer,
    },
 });

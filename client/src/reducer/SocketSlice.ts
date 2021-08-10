@@ -1,13 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { ChatArgswithRoom } from '../../../src/events-map';
+import { IUserStore } from '../../../src/index';
 
-interface SocketState {
-   id: string;
-   username: string;
-   room: {
-      current: string;
-      previous: string;
-   };
-}
+interface SocketState extends IUserStore {}
 
 interface updateStatePayload {
    key: keyof SocketState;
@@ -33,6 +28,12 @@ const SocketSlice = createSlice({
       changeRoom: (state, action: PayloadAction<string>) => {
          state.room.previous = state.room.current;
          state.room.current = action.payload;
+      },
+      addMsg: (state, action: PayloadAction<ChatArgswithRoom>) => {
+         if (!state.messages) {
+            state.messages = [];
+         }
+         state.messages.push(action.payload);
       },
    },
 });

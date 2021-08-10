@@ -23,6 +23,29 @@ input {
    &:disabled {
       cursor: default;
    }
+   &[type='submit'],
+   &[type='button'],
+   &[type='reset'] {
+      @include BGColor(crimson);
+      cursor: pointer;
+      font-weight: 500;
+
+      &:disabled {
+         cursor: default;
+      }
+   }
+}
+
+button {
+   @include BGColor(crimson);
+   border: none;
+   cursor: pointer;
+   display: block;
+   font-weight: 500;
+
+   &:disabled {
+      cursor: default;
+   }
 }
 
 body {

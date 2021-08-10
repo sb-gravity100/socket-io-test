@@ -8,19 +8,29 @@ import logger from 'morgan';
 import session from 'express-session';
 import cuid from 'cuid';
 import _MMStore from 'memorystore';
-import { Server } from 'socket.io';
-import { execSync } from 'child_process';
-import { SocketEvents } from './events-map';
-import _ from 'lodash';
+import { Server, Socket } from 'socket.io';
+import * as fs from 'fs/promises';
+import { ChatArgs, ChatArgswithRoom, SocketEvents } from './events-map';
+import _, { camelCase } from 'lodash';
 import { JSONFile, Low } from 'lowdb';
+import { readFile } from 'fs';
+import { execSync } from 'child_process';
+import {
+   adjectives,
+   colors,
+   names,
+   uniqueNamesGenerator,
+} from 'unique-names-generator';
+import { randomInt } from 'crypto';
 
-interface IUserStore {
+export interface IUserStore {
    id: string;
    username?: string;
-   room?: {
-      current?: string;
+   room: {
+      current: string;
       previous?: string;
    };
+   messages?: ChatArgswithRoom[];
 }
 interface Database {
    users: IUserStore[];
@@ -35,68 +45,147 @@ const MemoryStore = _MMStore(session);
 const DbAdapter = new JSONFile<Database>(path.join(CWD, 'db.json'));
 const db = new Low(DbAdapter);
 const dbChain = () => _.chain(db.data);
-const dbRefresh = async () => {
-   await db.write();
-};
+function getUserbyID(id: string) {
+   const user = dbChain().get('users').find({ id });
+   return user;
+}
+
+function multiplyNames(arr: string[]) {
+   return _.chain(arr)
+      .map(e => [e, _.camelCase(e), _.kebabCase(e), _.snakeCase(e)])
+      .flattenDeep()
+      .value();
+}
+
 async function boot() {
    debug('Initializing server...');
-   const app = express();
+
+   const usernames = (await fs.readFile(path.join(CWD, 'usernames.txt')))
+      .toString('utf-8')
+      .split(/\n/i);
+   function uniqueUsername() {
+      return uniqueNamesGenerator({
+         dictionaries: [
+            multiplyNames(names),
+            multiplyNames(colors),
+            multiplyNames(adjectives),
+            multiplyNames(usernames),
+         ],
+         length: randomInt(2, 3),
+         style: 'lowerCase',
+         separator: Math.random() < 0.5 ? '' : '_',
+      });
+   }
    await db.read();
+
+   const app = express();
    const serverUrl = execSync('gp url 3000').toString().trim();
    const server = http.createServer(app);
+   // console.log(usernames);
    const io = new Server<SocketEvents>(server, {
       cors: {
          origin: [serverUrl, 'https://admin.socket.io'],
       },
    });
-   await new Promise((resolve: any) => server.listen(SERVER_PORT, resolve));
-   debug('Server listening at %s', SERVER_PORT);
 
-   io.on('connection', async socket => {
+   const cleanDb = async () => {
       const all = Array.from(await io.allSockets());
       dbChain()
          .get('users')
          .remove(v => !all.includes(v.id))
          .value();
-      await dbRefresh();
-      const user: IUserStore = {
-         id: socket.id,
-      };
-      dbChain().get('users').push(user).value();
-      await dbRefresh();
-      debug('Connected: %s', socket.id);
+      await db.write();
+   };
 
-      socket.on('SET:username', async username => {
-         user.username = username;
-         dbChain()
-            .get('users')
-            .find({ id: socket.id })
-            .set('username', username)
-            .value();
-         await dbRefresh();
-      });
-      socket.on('SET:room', async (id, cb) => {
-         socket.join(id);
-         const _user = dbChain().get('users').find({ id: socket.id });
-         if (!_user.isEmpty()) {
-            _user.set('room', {
-               previous: _user.value().room.current,
-               current: id,
-            });
-            console.log(db.data.users);
-            await dbRefresh();
-            debug('%s joined room: %s', user.username || socket.id);
-            if (cb) cb();
-         }
-      });
-      socket.on('disconnect', async () => {
-         dbChain().get('users').remove({ id: socket.id }).value();
-         await dbRefresh();
-         debug('Disconnected: %s', socket.id);
-      });
+   await new Promise((resolve: any) => server.listen(SERVER_PORT, resolve));
+   debug('Server listening at %s', SERVER_PORT);
+   io.of('/').adapter.on('join-room', (room, id) => {
+      debug('%s joined room: %s', id, room);
    });
 
-   return { app, server, io };
+   io.on('connection', async socket => {
+      try {
+         await cleanDb();
+         dbChain()
+            .get('users')
+            .push({
+               id: socket.id,
+               username: uniqueUsername(),
+               room: {
+                  current: socket.id,
+               },
+            })
+            .value();
+         const user = _.find(db.data.users, { id: socket.id });
+         socket.emit('GET:user', user);
+         await cleanDb();
+         debug('Connected: %s', socket.id);
+
+         socket.on('SET:username', async (username, cb) => {
+            const user = getUserbyID(socket.id);
+            const room = user.value().room.current;
+            const name = user.value().username;
+            user.set('username', username).value();
+            await cleanDb();
+            socket.broadcast.to(room).emit('chat', {
+               username: `${room} bot`,
+               payload: `${
+                  name || 'Anonymous'
+               } set his username to ${username}!`,
+               createdAt: new Date(),
+               id: cuid(),
+            });
+            if (cb) cb();
+         });
+         socket.on('SET:room', async (id, cb) => {
+            socket.join(id);
+            const _user = getUserbyID(socket.id);
+            const username = _user.value().username;
+            if (_user.value()) {
+               _user
+                  .set('room', {
+                     previous: _user.value().room.current,
+                     current: id,
+                  })
+                  .value();
+               socket.broadcast.to(id).emit('chat', {
+                  username: `${id} bot`,
+                  payload: `${username || 'Anonymous'} just joined the room!`,
+                  createdAt: new Date(),
+                  id: cuid(),
+               });
+               await cleanDb();
+               if (cb) cb();
+            }
+         });
+
+         socket.on('message', async msg => {
+            const user = getUserbyID(socket.id);
+            const newMsg = {
+               id: cuid(),
+               username: user.value().username,
+               payload: msg,
+               createdAt: new Date(),
+            };
+            user
+               .get('messages')
+               .push({ ...newMsg, room: user.value().room.current })
+               .value();
+            await cleanDb();
+            socket.to(user.value().room.current).emit('chat', newMsg);
+         });
+
+         socket.on('disconnect', async () => {
+            dbChain().get('users').remove({ id: socket.id }).value();
+            await cleanDb();
+            debug('Disconnected: %s', socket.id);
+         });
+      } catch (e) {
+         console.log(e);
+      }
+   });
+
+   return { app, server, io, db };
 }
 
 boot()
@@ -135,5 +224,6 @@ boot()
       app.get('/', (req, res) => {
          res.send('Hello World');
       });
+      // app.get('/my-')
    })
    .catch(console.log);

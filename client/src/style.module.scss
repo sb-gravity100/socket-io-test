@@ -14,7 +14,7 @@ $form-padding: 0.5rem 0.3rem;
    z-index: -1;
 
    form {
-      box-shadow: 1px 2px 5px 0 #999;
+      box-shadow: $shadow;
       display: grid;
       grid-template-columns: 1fr 100px;
 

@@ -1,7 +1,11 @@
 {
   "users": [
     {
-      "id": "6u9lGE1JidI4nsHAAAAB"
+      "id": "0wA8ODJqkEETJF86AAAB",
+      "username": "barbiesapphire",
+      "room": {
+        "current": "0wA8ODJqkEETJF86AAAB"
+      }
     }
   ]
 }

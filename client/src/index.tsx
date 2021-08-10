@@ -12,6 +12,9 @@ socket.on('connect', () => {
    socket.emit('SET:room', 'public', () => {
       store.dispatch(changeRoom('public'));
    });
+   socket.on('GET:user', user => {
+      // store.getState().socket;
+   });
    // setInterval(() => {
    //    socket.emit('ping', 1);
    // }, 1000);
