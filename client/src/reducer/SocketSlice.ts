@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ChatArgswithRoom } from '../../../src/events-map';
-import { IUserStore } from '../../../src/index';
+import { ChatArgswithRoom, IUserStore } from '../../../src/events-map';
 
 interface SocketState extends IUserStore {}
 

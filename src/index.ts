@@ -10,7 +10,12 @@ import cuid from 'cuid';
 import _MMStore from 'memorystore';
 import { Server, Socket } from 'socket.io';
 import * as fs from 'fs/promises';
-import { ChatArgs, ChatArgswithRoom, SocketEvents } from './events-map';
+import {
+   ChatArgs,
+   ChatArgswithRoom,
+   IUserStore,
+   SocketEvents,
+} from './events-map';
 import _, { camelCase } from 'lodash';
 import { JSONFile, Low } from 'lowdb';
 import { readFile } from 'fs';
@@ -23,15 +28,6 @@ import {
 } from 'unique-names-generator';
 import { randomInt } from 'crypto';
 
-export interface IUserStore {
-   id: string;
-   username?: string;
-   room: {
-      current: string;
-      previous?: string;
-   };
-   messages?: ChatArgswithRoom[];
-}
 interface Database {
    users: IUserStore[];
 }

@@ -5,6 +5,7 @@ import { FaPaperPlane } from 'react-icons/fa';
 
 const AppRoom: FC = props => {
    const [msg, setMsg] = useState<string>('');
+   const [msgRow, setMsgRow] = useState<string[]>([]);
    const { room, username } = useSelector(state => state.socket);
    const messageHandler: FormEventHandler = function (e) {
       e.preventDefault();
@@ -24,7 +25,11 @@ const AppRoom: FC = props => {
                   <div className="user-space"></div>
                </div>
                <div className="room-space">
-                  <div className="msg-space"></div>
+                  <div className="msg-space">
+                     {msgRow.map(e => (
+                        <div className="msg-panel">{e}</div>
+                     ))}
+                  </div>
                   <div className="msg-form">
                      <form onSubmit={messageHandler}>
                         <input

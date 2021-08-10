@@ -53,8 +53,12 @@ const UsernameForm: React.FC<UsernameFormProps> = ({
 );
 
 const App: React.FC = () => {
+   const { id: socketID, username: socketUsername } = useSelector(
+      state => state.socket
+   );
    const [username, setUsername] = useSessionStorage<UserSession>('user', {
       error: [],
+      value: socketUsername || '',
    });
    useEffect(() => {
       if (username?.value) {
@@ -68,7 +72,6 @@ const App: React.FC = () => {
          );
       }
    }, []);
-   const socketID = useSelector(state => state.socket.id);
    const dispatch = useDispatch();
    const usernameHandler: FormEventHandler = e => {
       e.preventDefault();
@@ -101,7 +104,7 @@ const App: React.FC = () => {
       <>
          <div className={styles.fixed_group}>
             <h5>Current ID: {socketID}</h5>
-            {username?.value?.trim() && <h5>Username: {username.value}</h5>}
+            {username?.value?.trim() && <h5>Username: {socketUsername}</h5>}
          </div>
          <Header />
          <main>

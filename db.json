@@ -1,10 +1,11 @@
 {
   "users": [
     {
-      "id": "0wA8ODJqkEETJF86AAAB",
-      "username": "barbiesapphire",
+      "id": "t4rVmaFAMjdWCwR2AAAL",
+      "username": "Lowww",
       "room": {
-        "current": "0wA8ODJqkEETJF86AAAB"
+        "previous": "t4rVmaFAMjdWCwR2AAAL",
+        "current": "public"
       }
     }
   ]

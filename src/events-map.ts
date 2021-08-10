@@ -1,7 +1,15 @@
 import { Socket } from 'socket.io';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
-import { IUserStore } from './';
 
+export interface IUserStore {
+   id: string;
+   username?: string;
+   room: {
+      current: string;
+      previous?: string;
+   };
+   messages?: ChatArgswithRoom[];
+}
 type PrefixKeys<
    K extends string = '',
    T extends { [key: string]: any } = {}
