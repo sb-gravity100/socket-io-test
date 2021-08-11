@@ -17,7 +17,7 @@ import {
    SocketEvents,
 } from './events-map';
 import _, { camelCase } from 'lodash';
-import { JSONFile, Low } from 'lowdb';
+import { JSONFileSync, Low, LowSync } from 'lowdb';
 import { readFile } from 'fs';
 import { execSync } from 'child_process';
 import {
@@ -38,8 +38,8 @@ const publicFolder = path.normalize(path.join(__dirname, '../public/'));
 const CWD = path.normalize(path.join(__dirname, '../'));
 const debug = _dbug('socket');
 const MemoryStore = _MMStore(session);
-const DbAdapter = new JSONFile<Database>(path.join(CWD, 'db.json'));
-const db = new Low(DbAdapter);
+const DbAdapter = new JSONFileSync<Database>(path.join(CWD, 'database.json'));
+const db = new LowSync(DbAdapter);
 const dbChain = () => _.chain(db.data);
 function getUserbyID(id: string) {
    const user = dbChain().get('users').find({ id });
@@ -60,19 +60,21 @@ async function boot() {
       .toString('utf-8')
       .split(/\n/i);
    function uniqueUsername() {
-      return uniqueNamesGenerator({
-         dictionaries: [
-            multiplyNames(names),
-            multiplyNames(colors),
-            multiplyNames(adjectives),
-            multiplyNames(usernames),
-         ],
-         length: randomInt(2, 3),
-         style: 'lowerCase',
-         separator: Math.random() < 0.5 ? '' : '_',
-      });
+      return (
+         'Anonymous' +
+         (Math.random() < 0.5 ? '' : '_') +
+         uniqueNamesGenerator({
+            dictionaries: [
+               multiplyNames(names),
+               multiplyNames(colors),
+               multiplyNames(adjectives),
+            ],
+            length: randomInt(2, 3),
+            style: 'lowerCase',
+            separator: Math.random() < 0.5 ? '' : '_',
+         })
+      );
    }
-   await db.read();
 
    const app = express();
    const serverUrl = execSync('gp url 3000').toString().trim();
@@ -90,10 +92,11 @@ async function boot() {
          .get('users')
          .remove(v => !all.includes(v.id))
          .value();
-      await db.write();
+      db.write();
    };
 
    await new Promise((resolve: any) => server.listen(SERVER_PORT, resolve));
+   db.read();
    debug('Server listening at %s', SERVER_PORT);
    io.of('/').adapter.on('join-room', (room, id) => {
       debug('%s joined room: %s', id, room);
@@ -112,7 +115,7 @@ async function boot() {
                },
             })
             .value();
-         const user = _.find(db.data.users, { id: socket.id });
+         const user = dbChain().get('users').find({ id: socket.id }).value();
          socket.emit('GET:user', user);
          await cleanDb();
          debug('Connected: %s', socket.id);
@@ -136,7 +139,7 @@ async function boot() {
          socket.on('SET:room', async (id, cb) => {
             socket.join(id);
             const _user = getUserbyID(socket.id);
-            const username = _user.value().username;
+            const username = _user.value()?.username || uniqueUsername();
             if (_user.value()) {
                _user
                   .set('room', {

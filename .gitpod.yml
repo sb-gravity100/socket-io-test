@@ -1,7 +1,7 @@
 tasks:
    - name: Server
      init: npm i
-     command: npm run dev
+     command: npm start
    - name: Client
      init: cd client && npm i
      command: cd client && npm start
