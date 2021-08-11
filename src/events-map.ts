@@ -8,7 +8,6 @@ export interface IUserStore {
       current: string;
       previous?: string;
    };
-   messages?: ChatArgswithRoom[];
 }
 type PrefixKeys<
    K extends string = '',
@@ -38,8 +37,8 @@ export interface ChatArgswithRoom extends ChatArgs {
 type PrefixedSetEvents = PrefixKeys<'SET', SetEvents>;
 type PrefixedGetEvents = PrefixKeys<'GET', GetEvents>;
 interface DefaultEvents {
-   message(...args: any[]): void;
-   chat(...args: ChatArgs[]): void;
+   message(msg: string | ChatArgswithRoom, cb?: () => void): void;
+   chat(chat: ChatArgs): void;
    ping(n: number): void;
 }
 

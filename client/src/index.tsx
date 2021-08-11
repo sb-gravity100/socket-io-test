@@ -5,7 +5,7 @@ import App from './App';
 import { Provider } from 'react-redux';
 import { store } from './store';
 import { socket } from './socket';
-import { changeRoom, setID, updateState } from './reducer/SocketSlice';
+import { addMsg, changeRoom, setID, updateState } from './reducer/SocketSlice';
 
 socket.on('connect', () => {
    store.dispatch(setID(socket.id));
@@ -18,7 +18,6 @@ socket.on('connect', () => {
 });
 
 socket.on('GET:user', user => {
-   const socketStore = store.getState().socket;
    let key: keyof typeof user;
    for (key in user) {
       store.dispatch(

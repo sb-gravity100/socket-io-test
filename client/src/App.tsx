@@ -103,8 +103,11 @@ const App: React.FC = () => {
    return (
       <>
          <div className={styles.fixed_group}>
-            <h5>Current ID: {socketID}</h5>
-            {username?.value?.trim() && <h5>Username: {socketUsername}</h5>}
+            {socketID && <h5>Current ID: {socketID}</h5>}
+            <h5>
+               Username:{' '}
+               {socketUsername ? socketUsername : username?.value?.trim()}
+            </h5>
          </div>
          <Header />
          <main>

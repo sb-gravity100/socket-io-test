@@ -1,7 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ChatArgswithRoom, IUserStore } from '../../../src/events-map';
 
-interface SocketState extends IUserStore {}
+interface SocketState extends IUserStore {
+   messages: ChatArgswithRoom[];
+}
 
 interface updateStatePayload {
    key: keyof SocketState;
@@ -37,5 +39,5 @@ const SocketSlice = createSlice({
    },
 });
 
-export const { updateState, changeRoom, setID } = SocketSlice.actions;
+export const { updateState, changeRoom, setID, addMsg } = SocketSlice.actions;
 export default SocketSlice.reducer;

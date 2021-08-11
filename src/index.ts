@@ -17,7 +17,6 @@ import {
    SocketEvents,
 } from './events-map';
 import _, { camelCase } from 'lodash';
-import { JSONFileSync, Low, LowSync } from 'lowdb';
 import { readFile } from 'fs';
 import { execSync } from 'child_process';
 import {
@@ -27,9 +26,12 @@ import {
    uniqueNamesGenerator,
 } from 'unique-names-generator';
 import { randomInt } from 'crypto';
+import low from 'lowdb';
+import FileAsync from 'lowdb/adapters/FileAsync';
 
 interface Database {
    users: IUserStore[];
+   messages: ChatArgswithRoom[];
 }
 
 const { SERVER_PORT, NODE_ENV } = process.env;
@@ -38,13 +40,9 @@ const publicFolder = path.normalize(path.join(__dirname, '../public/'));
 const CWD = path.normalize(path.join(__dirname, '../'));
 const debug = _dbug('socket');
 const MemoryStore = _MMStore(session);
-const DbAdapter = new JSONFileSync<Database>(path.join(CWD, 'database.json'));
-const db = new LowSync(DbAdapter);
-const dbChain = () => _.chain(db.data);
-function getUserbyID(id: string) {
-   const user = dbChain().get('users').find({ id });
-   return user;
-}
+const adapter = new FileAsync<Database>(path.join(CWD, 'db.json'), {
+   defaultValue: { users: [], messages: [] },
+});
 
 function multiplyNames(arr: string[]) {
    return _.chain(arr)
@@ -55,14 +53,19 @@ function multiplyNames(arr: string[]) {
 
 async function boot() {
    debug('Initializing server...');
+   const db = await low(adapter);
 
-   const usernames = (await fs.readFile(path.join(CWD, 'usernames.txt')))
-      .toString('utf-8')
-      .split(/\n/i);
+   // const usernames = (await fs.readFile(path.join(CWD, 'usernames.txt')))
+   //    .toString('utf-8')
+   //    .split(/\n/i);
+
+   function getUserbyID(id: string) {
+      const user = db.get('users').find({ id });
+      return user;
+   }
    function uniqueUsername() {
       return (
-         'Anonymous' +
-         (Math.random() < 0.5 ? '' : '_') +
+         'Anonymous-' +
          uniqueNamesGenerator({
             dictionaries: [
                multiplyNames(names),
@@ -70,7 +73,7 @@ async function boot() {
                multiplyNames(adjectives),
             ],
             length: randomInt(2, 3),
-            style: 'lowerCase',
+            style: 'capital',
             separator: Math.random() < 0.5 ? '' : '_',
          })
       );
@@ -87,16 +90,16 @@ async function boot() {
    });
 
    const cleanDb = async () => {
-      const all = Array.from(await io.allSockets());
-      dbChain()
-         .get('users')
-         .remove(v => !all.includes(v.id))
-         .value();
-      db.write();
+      await db.write();
+      // const all = Array.from(await io.allSockets());
+      // await db
+      //    .get('users')
+      //    .remove(v => !all.includes(v.id))
+      //    .write();
    };
 
    await new Promise((resolve: any) => server.listen(SERVER_PORT, resolve));
-   db.read();
+   await db.read();
    debug('Server listening at %s', SERVER_PORT);
    io.of('/').adapter.on('join-room', (room, id) => {
       debug('%s joined room: %s', id, room);
@@ -105,8 +108,7 @@ async function boot() {
    io.on('connection', async socket => {
       try {
          await cleanDb();
-         dbChain()
-            .get('users')
+         db.get('users')
             .push({
                id: socket.id,
                username: uniqueUsername(),
@@ -115,9 +117,9 @@ async function boot() {
                },
             })
             .value();
-         const user = dbChain().get('users').find({ id: socket.id }).value();
-         socket.emit('GET:user', user);
          await cleanDb();
+         const user = db.get('users').find({ id: socket.id }).value();
+         socket.emit('GET:user', user);
          debug('Connected: %s', socket.id);
 
          socket.on('SET:username', async (username, cb) => {
@@ -158,24 +160,27 @@ async function boot() {
             }
          });
 
-         socket.on('message', async msg => {
+         socket.on('message', async (msg, cb) => {
             const user = getUserbyID(socket.id);
-            const newMsg = {
-               id: cuid(),
-               username: user.value().username,
-               payload: msg,
-               createdAt: new Date(),
-            };
-            user
-               .get('messages')
-               .push({ ...newMsg, room: user.value().room.current })
+            if (cb) cb();
+            if (typeof msg === 'string') {
+               msg = {
+                  id: cuid(),
+                  username: user.value().username,
+                  payload: msg,
+                  createdAt: new Date(),
+               };
+            }
+            db.get('messages')
+               .push({ ...msg, room: user.value().room.current })
                .value();
             await cleanDb();
-            socket.to(user.value().room.current).emit('chat', newMsg);
+            socket.broadcast.to(user.value().room.current).emit('chat', msg);
+            debug('%s: %s', user.value().username, msg.payload);
          });
 
          socket.on('disconnect', async () => {
-            dbChain().get('users').remove({ id: socket.id }).value();
+            db.get('users').remove({ id: socket.id }).value();
             await cleanDb();
             debug('Disconnected: %s', socket.id);
          });
