@@ -40,7 +40,7 @@ const MemoryStore = _MMStore(session);
 
 async function boot() {
    await db.read();
-   db.data = { users: [], messages: [] };
+   // db.data = { users: [], messages: [] };
    debug('Initializing server...');
    // const usernames = (await fs.readFile(path.join(CWD, 'usernames.txt')))
    //    .toString('utf-8')

@@ -1,4 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query';
+import { stringify } from 'querystring';
 import { ChatArgswithRoom, IUserStore } from '../../../src/events-map';
 
 interface SocketState extends IUserStore {
@@ -10,11 +12,31 @@ interface updateStatePayload {
    value: any;
 }
 
+interface MessageQuery {
+   before?: string;
+   after?: string;
+   username?: string;
+   id?: string;
+   room?: string;
+   limit?: number;
+}
+
 const initialState = {
    room: {
       current: '',
    },
 } as SocketState;
+
+const MessagesApi = createApi({
+   baseQuery: fetchBaseQuery({
+      baseUrl: '/api',
+   }),
+   endpoints: build => ({
+      getMessages: build.query<ChatArgswithRoom, MessageQuery>({
+         query: q => `/messages/${stringify({ ...q })}`,
+      }),
+   }),
+});
 
 const SocketSlice = createSlice({
    name: 'socket',
