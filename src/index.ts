@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
+import 'express-async-errors';
 import http from 'http';
 import path from 'path';
 import _dbug from 'debug';
@@ -8,16 +9,10 @@ import logger from 'morgan';
 import session from 'express-session';
 import cuid from 'cuid';
 import _MMStore from 'memorystore';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import * as fs from 'fs/promises';
-import {
-   ChatArgs,
-   ChatArgswithRoom,
-   IUserStore,
-   SocketEvents,
-} from './events-map';
-import _, { camelCase } from 'lodash';
-import { readFile } from 'fs';
+import { SocketEvents } from './events-map';
+import _ from 'lodash';
 import { execSync } from 'child_process';
 import {
    adjectives,
@@ -26,12 +21,8 @@ import {
    uniqueNamesGenerator,
 } from 'unique-names-generator';
 import { randomInt } from 'crypto';
-import { JSONFile, Low } from 'lowdb';
-
-interface Database {
-   users: IUserStore[];
-   messages: ChatArgswithRoom[];
-}
+import { db } from './db';
+import ApiRoute from './routes/api';
 
 const { SERVER_PORT, NODE_ENV } = process.env;
 const isDev = NODE_ENV === 'development';
@@ -39,30 +30,24 @@ const publicFolder = path.normalize(path.join(__dirname, '../public/'));
 const CWD = path.normalize(path.join(__dirname, '../'));
 const debug = _dbug('socket');
 const MemoryStore = _MMStore(session);
-const adapter = new JSONFile<Database>(path.join(CWD, 'db.json'));
-const db = new Low<Database>(adapter);
 
-function multiplyNames(arr: string[]) {
-   return _.chain(arr)
-      .map(e => [e, _.camelCase(e), _.kebabCase(e), _.snakeCase(e)])
-      .flattenDeep()
-      .value();
-}
+// function multiplyNames(arr: string[]) {
+//    return _.chain(arr)
+//       .map(e => [e, _.camelCase(e), _.kebabCase(e), _.snakeCase(e)])
+//       .flattenDeep()
+//       .value();
+// }
 
 async function boot() {
    await db.read();
    db.data = { users: [], messages: [] };
    debug('Initializing server...');
-
-   function dbChain() {
-      return _.chain(db.data);
-   }
    // const usernames = (await fs.readFile(path.join(CWD, 'usernames.txt')))
    //    .toString('utf-8')
    //    .split(/\n/i);
 
    function getUserbyID(id: string) {
-      const user = dbChain().get('users').find({ id });
+      const user = db.chain().get('users').find({ id });
       return user;
    }
    function uniqueUsername() {
@@ -89,7 +74,7 @@ async function boot() {
 
    const cleanDb = async () => {
       const all = Array.from(await io.allSockets());
-      dbChain()
+      db.chain()
          .get('users')
          .remove(v => !all.includes(v.id));
       await db.write();
@@ -104,7 +89,7 @@ async function boot() {
    io.on('connection', async socket => {
       try {
          await cleanDb();
-         dbChain()
+         db.chain()
             .get('users')
             .push({
                id: socket.id,
@@ -115,7 +100,7 @@ async function boot() {
             })
             .value();
          await cleanDb();
-         const user = dbChain().get('users').find({ id: socket.id }).value();
+         const user = db.chain().get('users').find({ id: socket.id }).value();
          socket.emit('GET:user', user);
          debug('Connected: %s', socket.id);
 
@@ -176,7 +161,7 @@ async function boot() {
                   room: room.current,
                };
             }
-            dbChain()
+            db.chain()
                .get('messages')
                .push({ ...msg, room: room.current })
                .value();
@@ -186,7 +171,7 @@ async function boot() {
          });
 
          socket.on('disconnect', async () => {
-            dbChain().get('users').remove({ id: socket.id }).value();
+            db.chain().get('users').remove({ id: socket.id }).value();
             await cleanDb();
             debug('Disconnected: %s', socket.id);
          });
@@ -231,9 +216,10 @@ boot()
          })
       );
       app.use(express.static(publicFolder));
-      app.get('/', (req, res) => {
-         res.send('Hello World');
-      });
-      app.use('/api/');
+      // app.get('/', (req, res) => {
+      //    res.send('Hello World');
+      // });
+
+      app.use('/api', ApiRoute);
    })
    .catch(console.log);
