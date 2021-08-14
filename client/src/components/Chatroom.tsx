@@ -4,11 +4,17 @@ import { useDispatch, useSelector } from 'src/store';
 import { FaPaperPlane } from 'react-icons/fa';
 import { ChatArgswithRoom } from '../../../src/events-map';
 import { addMsg } from 'src/reducer/SocketSlice';
+import { TimeAgoComponent } from '../time-ago';
 
-const ChatComponent: FC<Partial<ChatArgswithRoom>> = props => {
+const ChatComponent: FC<ChatArgswithRoom> = props => {
    return (
       <div className="msg-panel">
-         <div className="created-at">{props.createdAt?.toString()}</div>
+         <div className="created-at">
+            <TimeAgoComponent
+               date={new Date(props.createdAt)}
+               timeStyle="round-minute"
+            />
+         </div>
          <div className="username">{props.username}</div>
          <div className="payload">{props.payload}</div>
       </div>
@@ -23,26 +29,25 @@ const AppRoom: FC = props => {
          ? state.socket.messages.filter(e => e.room === room.current)
          : []
    );
-   console.log(Array.isArray(messages));
+   console.log(messages);
    const dispatch = useDispatch();
    const messageHandler: FormEventHandler = function (e) {
       e.preventDefault();
+      setMsg('');
       // e.persist()
       if (!msg) {
          return;
       }
-      socket.emit('message', msg, () => {
-         setMsg('');
-         dispatch(
-            addMsg({
-               createdAt: new Date(),
-               id: ((messages?.length || 0) + 1).toString(),
-               payload: msg,
-               username: username || id,
-               room: room.current,
-            })
-         );
-      });
+      dispatch(
+         addMsg({
+            createdAt: new Date(),
+            id: ((messages?.length || 0) + 1).toString(),
+            payload: msg,
+            username: username || id,
+            room: room.current,
+         })
+      );
+      socket.emit('message', msg);
    };
    return (
       <>

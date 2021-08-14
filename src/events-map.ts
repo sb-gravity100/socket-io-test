@@ -38,7 +38,7 @@ type PrefixedSetEvents = PrefixKeys<'SET', SetEvents>;
 type PrefixedGetEvents = PrefixKeys<'GET', GetEvents>;
 interface DefaultEvents {
    message(msg: string | ChatArgswithRoom, cb?: () => void): void;
-   chat(chat: ChatArgs): void;
+   chat(chat: ChatArgs | ChatArgswithRoom): void;
    ping(n: number): void;
 }
 

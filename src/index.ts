@@ -26,8 +26,7 @@ import {
    uniqueNamesGenerator,
 } from 'unique-names-generator';
 import { randomInt } from 'crypto';
-import low from 'lowdb';
-import FileAsync from 'lowdb/adapters/FileAsync';
+import { JSONFile, Low } from 'lowdb';
 
 interface Database {
    users: IUserStore[];
@@ -40,9 +39,8 @@ const publicFolder = path.normalize(path.join(__dirname, '../public/'));
 const CWD = path.normalize(path.join(__dirname, '../'));
 const debug = _dbug('socket');
 const MemoryStore = _MMStore(session);
-const adapter = new FileAsync<Database>(path.join(CWD, 'db.json'), {
-   defaultValue: { users: [], messages: [] },
-});
+const adapter = new JSONFile<Database>(path.join(CWD, 'db.json'));
+const db = new Low<Database>(adapter);
 
 function multiplyNames(arr: string[]) {
    return _.chain(arr)
@@ -52,26 +50,26 @@ function multiplyNames(arr: string[]) {
 }
 
 async function boot() {
+   await db.read();
+   db.data = { users: [], messages: [] };
    debug('Initializing server...');
-   const db = await low(adapter);
 
+   function dbChain() {
+      return _.chain(db.data);
+   }
    // const usernames = (await fs.readFile(path.join(CWD, 'usernames.txt')))
    //    .toString('utf-8')
    //    .split(/\n/i);
 
    function getUserbyID(id: string) {
-      const user = db.get('users').find({ id });
+      const user = dbChain().get('users').find({ id });
       return user;
    }
    function uniqueUsername() {
       return (
          'Anonymous-' +
          uniqueNamesGenerator({
-            dictionaries: [
-               multiplyNames(names),
-               multiplyNames(colors),
-               multiplyNames(adjectives),
-            ],
+            dictionaries: [colors, adjectives, names],
             length: randomInt(2, 3),
             style: 'capital',
             separator: Math.random() < 0.5 ? '' : '_',
@@ -90,16 +88,14 @@ async function boot() {
    });
 
    const cleanDb = async () => {
+      const all = Array.from(await io.allSockets());
+      dbChain()
+         .get('users')
+         .remove(v => !all.includes(v.id));
       await db.write();
-      // const all = Array.from(await io.allSockets());
-      // await db
-      //    .get('users')
-      //    .remove(v => !all.includes(v.id))
-      //    .write();
    };
 
    await new Promise((resolve: any) => server.listen(SERVER_PORT, resolve));
-   await db.read();
    debug('Server listening at %s', SERVER_PORT);
    io.of('/').adapter.on('join-room', (room, id) => {
       debug('%s joined room: %s', id, room);
@@ -108,7 +104,8 @@ async function boot() {
    io.on('connection', async socket => {
       try {
          await cleanDb();
-         db.get('users')
+         dbChain()
+            .get('users')
             .push({
                id: socket.id,
                username: uniqueUsername(),
@@ -118,14 +115,18 @@ async function boot() {
             })
             .value();
          await cleanDb();
-         const user = db.get('users').find({ id: socket.id }).value();
+         const user = dbChain().get('users').find({ id: socket.id }).value();
          socket.emit('GET:user', user);
          debug('Connected: %s', socket.id);
 
          socket.on('SET:username', async (username, cb) => {
+            if (cb) cb();
             const user = getUserbyID(socket.id);
             const room = user.value().room.current;
             const name = user.value().username;
+            if (name === username) {
+               return;
+            }
             user.set('username', username).value();
             await cleanDb();
             socket.broadcast.to(room).emit('chat', {
@@ -136,13 +137,14 @@ async function boot() {
                createdAt: new Date(),
                id: cuid(),
             });
-            if (cb) cb();
+            debug('Set username `%s` for: %s', username, user.value().id);
          });
          socket.on('SET:room', async (id, cb) => {
             socket.join(id);
             const _user = getUserbyID(socket.id);
             const username = _user.value()?.username || uniqueUsername();
             if (_user.value()) {
+               if (cb) cb();
                _user
                   .set('room', {
                      previous: _user.value().room.current,
@@ -154,33 +156,37 @@ async function boot() {
                   payload: `${username || 'Anonymous'} just joined the room!`,
                   createdAt: new Date(),
                   id: cuid(),
+                  room: id,
                });
                await cleanDb();
-               if (cb) cb();
             }
          });
 
          socket.on('message', async (msg, cb) => {
             const user = getUserbyID(socket.id);
+            const room = user.value().room;
+            const username = user.value().username;
             if (cb) cb();
             if (typeof msg === 'string') {
                msg = {
                   id: cuid(),
-                  username: user.value().username,
+                  username: username,
                   payload: msg,
                   createdAt: new Date(),
+                  room: room.current,
                };
             }
-            db.get('messages')
-               .push({ ...msg, room: user.value().room.current })
+            dbChain()
+               .get('messages')
+               .push({ ...msg, room: room.current })
                .value();
             await cleanDb();
-            socket.broadcast.to(user.value().room.current).emit('chat', msg);
-            debug('%s: %s', user.value().username, msg.payload);
+            socket.broadcast.to(room.current).emit('chat', msg);
+            // debug('%s: %s', user.value().username, msg.payload);
          });
 
          socket.on('disconnect', async () => {
-            db.get('users').remove({ id: socket.id }).value();
+            dbChain().get('users').remove({ id: socket.id }).value();
             await cleanDb();
             debug('Disconnected: %s', socket.id);
          });
@@ -228,6 +234,6 @@ boot()
       app.get('/', (req, res) => {
          res.send('Hello World');
       });
-      // app.get('/my-')
+      app.use('/api/');
    })
    .catch(console.log);
