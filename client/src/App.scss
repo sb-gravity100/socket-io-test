@@ -36,6 +36,11 @@
          display: grid;
          grid-template-rows: 1fr auto;
 
+         .msg-space {
+            overflow-y: auto;
+            height: 424px;
+         }
+
          .msg-form {
             background: lighten(crimson, 30);
             padding: 0.4rem;

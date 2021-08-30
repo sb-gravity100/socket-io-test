@@ -1,9 +1,9 @@
 tasks:
    - name: Server
-     init: yarn
+     init: npm i
      command: yarn start
    - name: Client
-     init: cd client && yarn
+     init: cd client && npm i
      command: yarn start
 ports:
    - port: 5000

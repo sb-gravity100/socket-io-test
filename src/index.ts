@@ -76,7 +76,7 @@ async function boot() {
       const all = Array.from(await io.allSockets());
       db.chain()
          .get('users')
-         .remove(v => !all.includes(v.id));
+         .remove((v) => !all.includes(v.id));
       await db.write();
    };
 
@@ -86,7 +86,7 @@ async function boot() {
       debug('%s joined room: %s', id, room);
    });
 
-   io.on('connection', async socket => {
+   io.on('connection', async (socket) => {
       try {
          await cleanDb();
          db.chain()
@@ -166,7 +166,7 @@ async function boot() {
                .push({ ...msg, room: room.current })
                .value();
             await cleanDb();
-            socket.broadcast.to(room.current).emit('chat', msg);
+            socket.broadcast.in(room.current).emit('chat', msg);
             // debug('%s: %s', user.value().username, msg.payload);
          });
 
@@ -188,9 +188,9 @@ boot()
       app.use(
          logger(isDev ? 'dev' : 'common', {
             stream: {
-               write: msg => debug(msg.trimEnd()),
+               write: (msg) => debug(msg.trimEnd()),
             },
-            skip: req => {
+            skip: (req) => {
                if (req.url.match('/socket.io')) {
                   return true;
                }

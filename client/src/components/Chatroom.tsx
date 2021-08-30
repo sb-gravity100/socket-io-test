@@ -5,8 +5,9 @@ import { FaPaperPlane } from 'react-icons/fa';
 import { ChatArgswithRoom } from '../../../src/events-map';
 import { addMsg } from 'src/reducer/SocketSlice';
 import { TimeAgoComponent } from '../time-ago';
+import { useDebounce } from 'react-use';
 
-const ChatComponent: FC<ChatArgswithRoom> = props => {
+const ChatComponent: FC<ChatArgswithRoom> = (props) => {
    return (
       <div className="msg-panel">
          <div className="created-at">
@@ -21,16 +22,26 @@ const ChatComponent: FC<ChatArgswithRoom> = props => {
    );
 };
 
-const AppRoom: FC = props => {
+const AppRoom: FC = (props) => {
    const [msg, setMsg] = useState<string>('');
-   const { room, username, id } = useSelector(state => state.socket);
-   const messages = useSelector(state =>
+   const { room, username, id } = useSelector((state) => state.socket);
+   const messages = useSelector((state) =>
       state.socket.messages
-         ? state.socket.messages.filter(e => e.room === room.current)
+         ? state.socket.messages.filter((e) => e.room === room.current)
          : []
    );
-   console.log(messages);
    const dispatch = useDispatch();
+
+   useDebounce(
+      () => {
+         const msgSpace = document.querySelector('.msg-space');
+         msgSpace?.scrollTo({
+            top: msgSpace.scrollHeight,
+         });
+      },
+      100,
+      [messages]
+   );
    const messageHandler: FormEventHandler = function (e) {
       e.preventDefault();
       setMsg('');
@@ -64,7 +75,7 @@ const AppRoom: FC = props => {
                <div className="room-space">
                   <div className="msg-space">
                      {Array.isArray(messages) &&
-                        messages.map(msg => (
+                        messages.map((msg) => (
                            <ChatComponent key={msg.id} {...msg} />
                         ))}
                   </div>
@@ -73,7 +84,7 @@ const AppRoom: FC = props => {
                         <input
                            type="text"
                            value={msg}
-                           onChange={e => setMsg(e.target.value)}
+                           onChange={(e) => setMsg(e.target.value)}
                         />
                         <button type="submit" title="Send">
                            <FaPaperPlane />

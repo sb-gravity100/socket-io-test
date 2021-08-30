@@ -17,12 +17,12 @@ socket.on('connect', () => {
    // }, 1000);
 });
 
-socket.on('chat', chat => {
+socket.on('chat', (chat) => {
    console.log(chat);
    store.dispatch(addMsg(chat));
 });
 
-socket.on('GET:user', user => {
+socket.on('GET:user', (user) => {
    let key: keyof typeof user;
    for (key in user) {
       store.dispatch(
