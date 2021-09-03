@@ -39,6 +39,42 @@
          .msg-space {
             overflow-y: auto;
             height: 424px;
+            padding: 0.4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+
+            .msg-panel {
+               display: grid;
+               background: white;
+               box-shadow: 2px 2px 5px #ddd;
+               border-radius: 10px;
+               padding: 0.4rem;
+               grid-template-columns: 1fr;
+
+               .username {
+                  color: blue;
+                  font-weight: 500;
+               }
+
+               .info {
+                  display: flex;
+                  gap: 10px;
+                  align-items: center;
+                  justify-content: space-between;
+                  .created-at {
+                     font-size: 0.8rem;
+                  }
+
+                  .username {
+                     color: green;
+                     flex-grow: 1;
+                  }
+               }
+
+               .payload {
+               }
+            }
          }
 
          .msg-form {

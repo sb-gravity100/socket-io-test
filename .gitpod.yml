@@ -1,10 +1,8 @@
 tasks:
    - name: Server
      init: npm i
-     command: yarn start
    - name: Client
      init: cd client && npm i
-     command: yarn start
 ports:
    - port: 5000
      visibility: public

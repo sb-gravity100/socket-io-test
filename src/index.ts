@@ -138,7 +138,7 @@ async function boot() {
                   .value();
                socket.broadcast.to(id).emit('chat', {
                   username: `${id} bot`,
-                  payload: `${username || 'Anonymous'} just joined the room!`,
+                  payload: `[${username || 'Anonymous'}] just joined the room!`,
                   createdAt: new Date(),
                   id: cuid(),
                   room: id,
@@ -171,7 +171,16 @@ async function boot() {
          });
 
          socket.on('disconnect', async () => {
-            db.chain().get('users').remove({ id: socket.id }).value();
+            const users = db.chain().get('users');
+            const user = users.find({ id: socket.id }).value();
+            socket.broadcast.to(user?.room?.current).emit('chat', {
+               username: `${user?.room?.current} bot`,
+               payload: `[${user?.id || 'Anonymous'}] just left the room!`,
+               createdAt: new Date(),
+               id: cuid(),
+               room: user?.room?.current,
+            });
+            users.remove({ id: socket.id }).value();
             await cleanDb();
             debug('Disconnected: %s', socket.id);
          });

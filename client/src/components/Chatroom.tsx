@@ -8,16 +8,30 @@ import { TimeAgoComponent } from '../time-ago';
 import { useDebounce } from 'react-use';
 
 const ChatComponent: FC<ChatArgswithRoom> = (props) => {
+   const { room } = useSelector((state) => state.socket);
    return (
       <div className="msg-panel">
-         <div className="created-at">
-            <TimeAgoComponent
-               date={new Date(props.createdAt)}
-               timeStyle="round-minute"
-            />
+         <div className="info">
+            <div className="username">{props.username}</div>
+            <div className="created-at">
+               <TimeAgoComponent
+                  date={new Date(props.createdAt)}
+                  timeStyle="round-minute"
+               />
+            </div>
          </div>
-         <div className="username">{props.username}</div>
-         <div className="payload">{props.payload}</div>
+         <div className="payload">
+            {props.username === `${room.current} bot` ? (
+               <>
+                  <span className="username">
+                     {props.payload.slice(1, props.payload.indexOf(']'))}
+                  </span>{' '}
+                  {props.payload.slice(props.payload.indexOf(']') + 1)}
+               </>
+            ) : (
+               props.payload
+            )}
+         </div>
       </div>
    );
 };
