@@ -1,13 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-
-function App() {
-   return <div className="app">Hello World</div>;
-}
+import 'bootstrap/dist/css/bootstrap.min.css';
+import App from './App';
 
 ReactDOM.render(
    <React.StrictMode>
-      <App></App>
+      <App />
    </React.StrictMode>,
    document.querySelector('#root')
 );
