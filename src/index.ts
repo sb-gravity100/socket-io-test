@@ -19,8 +19,8 @@ import {
    colors,
    names,
    uniqueNamesGenerator,
+   NumberDictionary,
 } from 'unique-names-generator';
-import { randomInt } from 'crypto';
 import { db } from './db';
 import ApiRoute from './routes/api';
 
@@ -49,17 +49,6 @@ async function boot() {
    function getUserbyID(id: string) {
       const user = db.chain().get('users').find({ id });
       return user;
-   }
-   function uniqueUsername() {
-      return (
-         'Anonymous-' +
-         uniqueNamesGenerator({
-            dictionaries: [colors, adjectives, names],
-            length: randomInt(2, 3),
-            style: 'capital',
-            separator: Math.random() < 0.5 ? '' : '_',
-         })
-      );
    }
 
    const app = express();
@@ -93,7 +82,6 @@ async function boot() {
             .get('users')
             .push({
                id: socket.id,
-               username: uniqueUsername(),
                room: {
                   current: socket.id,
                },
@@ -101,74 +89,7 @@ async function boot() {
             .value();
          await cleanDb();
          const user = db.chain().get('users').find({ id: socket.id }).value();
-         socket.emit('GET:user', user);
          debug('Connected: %s', socket.id);
-
-         socket.on('SET:username', async (username, cb) => {
-            if (cb) cb();
-            const user = getUserbyID(socket.id);
-            const room = user.value().room.current;
-            const name = user.value().username;
-            if (name === username) {
-               return;
-            }
-            user.set('username', username).value();
-            await cleanDb();
-            socket.broadcast.to(room).emit('chat', {
-               username: `${room} bot`,
-               payload: `${
-                  name || 'Anonymous'
-               } set his username to ${username}!`,
-               createdAt: new Date(),
-               id: cuid(),
-            });
-            debug('Set username `%s` for: %s', username, user.value().id);
-         });
-         socket.on('SET:room', async (id, cb) => {
-            socket.join(id);
-            const _user = getUserbyID(socket.id);
-            const username = _user.value()?.username || uniqueUsername();
-            if (_user.value()) {
-               if (cb) cb();
-               _user
-                  .set('room', {
-                     previous: _user.value().room.current,
-                     current: id,
-                  })
-                  .value();
-               socket.broadcast.to(id).emit('chat', {
-                  username: `${id} bot`,
-                  payload: `[${username || 'Anonymous'}] just joined the room!`,
-                  createdAt: new Date(),
-                  id: cuid(),
-                  room: id,
-               });
-               await cleanDb();
-            }
-         });
-
-         socket.on('message', async (msg, cb) => {
-            const user = getUserbyID(socket.id);
-            const room = user.value().room;
-            const username = user.value().username;
-            if (cb) cb();
-            if (typeof msg === 'string') {
-               msg = {
-                  id: cuid(),
-                  username: username,
-                  payload: msg,
-                  createdAt: new Date(),
-                  room: room.current,
-               };
-            }
-            db.chain()
-               .get('messages')
-               .push({ ...msg, room: room.current })
-               .value();
-            await cleanDb();
-            socket.broadcast.in(room.current).emit('chat', msg);
-            // debug('%s: %s', user.value().username, msg.payload);
-         });
 
          socket.on('disconnect', async () => {
             const users = db.chain().get('users');
