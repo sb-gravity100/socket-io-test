@@ -24,19 +24,39 @@ const UserSlice = createSlice({
    reducers: {
       logIn(state) {
          state.isLoggedIn = true;
-         socket.connect();
+         if (!socket.connected) {
+            socket.connect();
+         }
       },
       logOut(state) {
          state.isLoggedIn = false;
-         socket.disconnect();
+         if (socket.connected) {
+            socket.disconnect();
+         }
       },
       joinRoom(state, action: PayloadAction<string>) {
          state.room.previous = state.room.current;
          state.room.current = action.payload;
          socket.emit('join-room');
       },
+      setKey<T extends keyof UserState>(
+         state: any,
+         action: PayloadAction<{
+            key: T;
+            value: ((state: UserState[T]) => any) | any;
+         }>
+      ) {
+         if (typeof action.payload.value === 'function') {
+            state[action.payload.key as any] = action.payload.value(
+               state[action.payload.key as any]
+            );
+         } else {
+            state[action.payload.key as any] = action.payload.value;
+         }
+      },
+      sendMessage(state, action: PayloadAction<string>) {},
    },
 });
 
-export const { logOut, logIn, joinRoom } = UserSlice.actions;
+export const { logOut, logIn, joinRoom, setKey } = UserSlice.actions;
 export default UserSlice.reducer;

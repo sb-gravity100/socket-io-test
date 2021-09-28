@@ -5,10 +5,14 @@ import store from './store';
 import './index.scss';
 import { Provider } from 'react-redux';
 import socket from './socket';
-import { joinRoom } from './slices/UserSlice';
+import { joinRoom, logOut } from './slices/UserSlice';
 
 socket.on('connect', () => {
    store.dispatch(joinRoom('public'));
+});
+
+socket.on('connect_error', () => {
+   store.dispatch(logOut());
 });
 
 ReactDOM.render(

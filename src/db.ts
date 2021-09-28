@@ -1,7 +1,7 @@
 import _, { ObjectChain } from 'lodash';
 import { JSONFile, Low } from 'lowdb';
 import path from 'path';
-import { ChatArgswithRoom, IUserStore } from './events-map';
+import { ChatArgswithRoom, IUserStore } from './types';
 
 // interface LowDB<T = { [key: string]: any; [num: number]: any }> extends Low<T> {
 //    chain?(): ObjectChain<T>;

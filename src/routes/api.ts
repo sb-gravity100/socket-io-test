@@ -1,6 +1,6 @@
 import { Request, Router } from 'express';
 import { Collection, CollectionChain, filter, ObjectChain } from 'lodash';
-import { ChatArgswithRoom } from 'src/events-map';
+import { ChatArgswithRoom } from './types';
 import { db } from '../db';
 
 type NewRequest<Body = {}, Query = any> = Request<
@@ -35,7 +35,7 @@ route.get('/messages', async (req: NewRequest<{}, MessageQuery>, res) => {
          | ObjectChain<ChatArgswithRoom> = db
          .chain()
          .get('messages')
-         .filter(msg => {
+         .filter((msg) => {
             if (before && after) {
                const beforeDate = new Date(before);
                const afterDate = new Date(after);

@@ -11,16 +11,9 @@ import cuid from 'cuid';
 import _MMStore from 'memorystore';
 import { Server } from 'socket.io';
 import * as fs from 'fs/promises';
-import { SocketEvents } from './events-map';
+import { SocketEvents } from './types';
 import _ from 'lodash';
 import { execSync } from 'child_process';
-import {
-   adjectives,
-   colors,
-   names,
-   uniqueNamesGenerator,
-   NumberDictionary,
-} from 'unique-names-generator';
 import { db } from './db';
 import ApiRoute from './routes/api';
 
