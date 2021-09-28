@@ -6,7 +6,7 @@ import {
    names,
 } from 'unique-names-generator';
 
-export function randomUsername() {
+export function useRandomUsername() {
    return uniqueNamesGenerator({
       dictionaries: [
          Math.random() < 0.5 ? adjectives : colors,

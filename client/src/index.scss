@@ -1,3 +1,18 @@
+@import '../node_modules/bootstrap/scss/functions';
+
+$primary: #004346ff;
+$secondary: #74b3ceff;
+$danger: #fe5f55;
+$warning: #ffc971;
+$dark: shade-color(#172a3aff, 10);
+$light: tint-color(#09bc8aff, 10);
+$body-bg: #f7fffe;
+
+@import '../node_modules/bootstrap/scss/variables';
+@import '../node_modules/bootstrap/scss/mixins';
+@import '../node_modules/bootstrap/scss/root';
+@import '../node_modules/bootstrap/scss/bootstrap';
+
 #root {
    height: 100vh;
 }

@@ -4,9 +4,12 @@ import {
    useSelector as useReduxSelector,
    useDispatch as useReduxDispatch,
 } from 'react-redux';
+import UserSlice from './slices/UserSlice';
 
 const store = configureStore({
-   reducer: {},
+   reducer: {
+      user: UserSlice,
+   },
 });
 
 export default store;

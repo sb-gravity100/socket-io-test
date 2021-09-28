@@ -1,25 +1,32 @@
-import { useRef } from 'react';
+/* eslint-disable react/jsx-no-undef */
+import { FormEventHandler, useRef } from 'react';
 import { Form, Button } from 'react-bootstrap';
-import { randomUsername } from 'src/funcs';
+import { useRandomUsername } from 'src/hooks';
+import SmolAlert from './SmolAlert';
 
 const LoginForm: React.FC<any> = () => {
    const idRef = useRef<HTMLInputElement>();
+   const generateUsername = useRandomUsername();
+
+   const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
+      e.preventDefault();
+   };
 
    const handleRandomUsernameClick = () => {
       if (idRef.current) {
-         idRef.current.value = randomUsername();
+         idRef.current.value = generateUsername();
       }
    };
    return (
-      <Form className="w-100">
+      <Form onSubmit={handleSubmit} className="w-100">
          <Form.Group className="mb-2">
             <Form.Label>
-               Start a <span className="fw-bold">Persona</span>
+               Create your <span className="fw-bold">Stand!</span>
             </Form.Label>
             <Form.Control
                type="text"
                ref={idRef as any}
-               placeholder={randomUsername()}
+               placeholder={generateUsername()}
                required
             />
          </Form.Group>
