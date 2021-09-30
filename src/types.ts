@@ -26,6 +26,7 @@ interface EmitEvents {
 
 type ListenEvents = {
    message(payload: string, createdAt: Date, cb?: () => void): void;
-}
+   'user-id'(id: string): void;
+};
 
-export type SocketEvents = EmitEvents & ListenEvents
+export type SocketEvents = EmitEvents & ListenEvents;

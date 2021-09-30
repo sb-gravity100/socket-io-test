@@ -8,7 +8,7 @@ type UserState = {
    username: string;
    messages: ChatArgswithRoom[];
    room: {
-      current: string;
+      current?: string;
       previous?: string;
    };
    isLoggedIn: boolean;
@@ -16,6 +16,10 @@ type UserState = {
 
 const initialState = {
    isLoggedIn: false,
+   room: {
+      previous: undefined,
+      current: undefined,
+   },
 } as UserState;
 
 const UserSlice = createSlice({
@@ -37,7 +41,7 @@ const UserSlice = createSlice({
       joinRoom(state, action: PayloadAction<string>) {
          state.room.previous = state.room.current;
          state.room.current = action.payload;
-         socket.emit('join-room');
+         socket.emit('join-room', state.room.current);
       },
       setKey<T extends keyof UserState>(
          state: any,

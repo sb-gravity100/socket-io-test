@@ -15,4 +15,4 @@ const store = configureStore({
 export default store;
 export type RootState = ReturnType<typeof store.getState>;
 export const useSelector: TypedUseSelectorHook<RootState> = useReduxSelector;
-export const useDispatch = () => useReduxDispatch<RootState>();
+export const useDispatch = () => useReduxDispatch<typeof store.dispatch>();

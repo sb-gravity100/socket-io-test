@@ -5,9 +5,16 @@ const url = execSync('gp url 5000').toString().trim();
 
 module.exports = (app) => {
    app.use(
-      'socket.io',
+      '/socket.io',
       createProxyMiddleware({
          target: url.replace(/^https?/i, 'ws'),
+         changeOrigin: true,
+      })
+   );
+   app.use(
+      '/api',
+      createProxyMiddleware({
+         target: url,
          changeOrigin: true,
       })
    );

@@ -16,6 +16,7 @@ import _ from 'lodash';
 import { execSync } from 'child_process';
 import { db } from './db';
 import ApiRoute from './routes/api';
+import cors from 'cors';
 
 const { SERVER_PORT, NODE_ENV } = process.env;
 const isDev = NODE_ENV === 'development';
@@ -33,11 +34,7 @@ const MemoryStore = _MMStore(session);
 
 async function boot() {
    await db.read();
-   // db.data = { users: [], messages: [] };
    debug('Initializing server...');
-   // const usernames = (await fs.readFile(path.join(CWD, 'usernames.txt')))
-   //    .toString('utf-8')
-   //    .split(/\n/i);
 
    function getUserbyID(id: string) {
       const user = db.chain().get('users').find({ id });
@@ -47,7 +44,7 @@ async function boot() {
    const app = express();
    const serverUrl = execSync('gp url 3000').toString().trim();
    const server = http.createServer(app);
-   // console.log(usernames);
+
    const io = new Server<SocketEvents>(server, {
       cors: {
          origin: [serverUrl, 'https://admin.socket.io'],
@@ -64,9 +61,6 @@ async function boot() {
 
    await new Promise((resolve: any) => server.listen(SERVER_PORT, resolve));
    debug('Server listening at %s', SERVER_PORT);
-   io.of('/').adapter.on('join-room', (room, id) => {
-      debug('%s joined room: %s', id, room);
-   });
 
    io.on('connection', async (socket) => {
       try {
@@ -101,6 +95,7 @@ async function boot() {
 
 boot()
    .then(({ app, io }) => {
+      app.use(cors());
       app.use(
          logger(isDev ? 'dev' : 'common', {
             stream: {
