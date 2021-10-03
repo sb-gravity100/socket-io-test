@@ -7,14 +7,14 @@ import path from 'path';
 import _dbug from 'debug';
 import logger from 'morgan';
 import session from 'express-session';
-import cuid from 'cuid';
+// import cuid from 'cuid';
 import _MMStore from 'memorystore';
 import { Server } from 'socket.io';
-import * as fs from 'fs/promises';
+// import * as fs from 'fs/promises';
 import { SocketEvents } from './types';
 import _ from 'lodash';
 import { execSync } from 'child_process';
-import { db } from './db';
+import { socketDb } from './db';
 import ApiRoute from './routes/api';
 
 const { SERVER_PORT, NODE_ENV } = process.env;
@@ -24,79 +24,33 @@ const CWD = path.normalize(path.join(__dirname, '../'));
 const debug = _dbug('socket');
 const MemoryStore = _MMStore(session);
 
-// function multiplyNames(arr: string[]) {
-//    return _.chain(arr)
-//       .map(e => [e, _.camelCase(e), _.kebabCase(e), _.snakeCase(e)])
-//       .flattenDeep()
-//       .value();
-// }
-
 async function boot() {
-   await db.read();
-   // db.data = { users: [], messages: [] };
    debug('Initializing server...');
-   // const usernames = (await fs.readFile(path.join(CWD, 'usernames.txt')))
-   //    .toString('utf-8')
-   //    .split(/\n/i);
-
-   function getUserbyID(id: string) {
-      const user = db.chain().get('users').find({ id });
-      return user;
-   }
 
    const app = express();
    const serverUrl = execSync('gp url 3000').toString().trim();
    const server = http.createServer(app);
-   // console.log(usernames);
    const io = new Server<SocketEvents>(server, {
       cors: {
          origin: [serverUrl, 'https://admin.socket.io'],
       },
    });
 
-   const cleanDb = async () => {
-      const all = Array.from(await io.allSockets());
-      db.chain()
-         .get('users')
-         .remove((v) => !all.includes(v.id));
-      await db.write();
-   };
-
-   await new Promise((resolve: any) => server.listen(SERVER_PORT, resolve));
+   await new Promise<void>((resolve) => server.listen(SERVER_PORT, resolve));
    debug('Server listening at %s', SERVER_PORT);
    io.of('/').adapter.on('join-room', (room, id) => {
       debug('%s joined room: %s', id, room);
    });
 
    io.on('connection', async (socket) => {
-      try {
-         await cleanDb();
-         db.chain()
-            .get('users')
-            .push({
-               id: socket.id,
-               room: {
-                  current: socket.id,
-               },
-            })
-            .value();
-         await cleanDb();
-         const user = db.chain().get('users').find({ id: socket.id }).value();
          debug('Connected: %s', socket.id);
 
          socket.on('disconnect', async () => {
-            const users = db.chain().get('users');
-            const user = users.find({ id: socket.id }).value();
-            users.remove({ id: socket.id }).value();
-            await cleanDb();
             debug('Disconnected: %s', socket.id);
          });
-      } catch (e) {
-         console.log(e);
-      }
    });
 
-   return { app, server, io, db };
+   return { app, server, io, db }
 }
 
 boot()
@@ -119,7 +73,7 @@ boot()
             secret: 'socket-test',
             resave: true,
             saveUninitialized: true,
-            genid: () => cuid(),
+            // genid: () => cuid(),
             cookie: {
                httpOnly: false,
                path: '/',
