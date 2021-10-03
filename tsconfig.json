@@ -1,9 +1,9 @@
 {
       "compilerOptions": {
-            "incremental": true,
+            // "incremental": true,
             "target": "es2016",
             "module": "CommonJS",
-            "lib": ["es5", "ES6", "ESNext"],
+            "lib": ["es5", "ES6", "ESNext", "dom"],
             // "allowJs": true,
             // "checkJs": true,
             // "jsx": "preserve",
@@ -27,7 +27,7 @@
             "strictBindCallApply": false,
             "strictPropertyInitialization": false,
             "noImplicitThis": false,
-            "alwaysStrict": true,
+            // "alwaysStrict": true,
             "noUnusedLocals": false,
             "noUnusedParameters": false,
             // "noImplicitReturns": true,

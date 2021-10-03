@@ -16,6 +16,7 @@ import _ from 'lodash';
 import { execSync } from 'child_process';
 import { socketDb } from './db';
 import ApiRoute from './routes/api';
+import cors from 'cors';
 
 const { SERVER_PORT, NODE_ENV } = process.env;
 const isDev = NODE_ENV === 'development';
@@ -30,6 +31,7 @@ async function boot() {
    const app = express();
    const serverUrl = execSync('gp url 3000').toString().trim();
    const server = http.createServer(app);
+
    const io = new Server<SocketEvents>(server, {
       cors: {
          origin: [serverUrl, 'https://admin.socket.io'],
@@ -38,9 +40,6 @@ async function boot() {
 
    await new Promise<void>((resolve) => server.listen(SERVER_PORT, resolve));
    debug('Server listening at %s', SERVER_PORT);
-   io.of('/').adapter.on('join-room', (room, id) => {
-      debug('%s joined room: %s', id, room);
-   });
 
    io.on('connection', async (socket) => {
          debug('Connected: %s', socket.id);
@@ -50,11 +49,12 @@ async function boot() {
          });
    });
 
-   return { app, server, io, db }
+   return { app, server, io }
 }
 
 boot()
    .then(({ app, io }) => {
+      app.use(cors());
       app.use(
          logger(isDev ? 'dev' : 'common', {
             stream: {

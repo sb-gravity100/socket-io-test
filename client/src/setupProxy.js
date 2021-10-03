@@ -12,9 +12,16 @@ if (hostname() === 'seven-PC') {
 
 module.exports = (app) => {
    app.use(
-      'socket.io',
+      '/socket.io',
       createProxyMiddleware({
          target: url.replace(/^https/i, 'ws'),
+         changeOrigin: true,
+      })
+   );
+   app.use(
+      '/api',
+      createProxyMiddleware({
+         target: url,
          changeOrigin: true,
       })
    );

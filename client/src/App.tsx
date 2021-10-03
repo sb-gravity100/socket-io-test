@@ -7,20 +7,16 @@ import { useSelector } from './store';
 
 const App: FC = () => {
    const { isLoggedIn } = useSelector((state) => state.user);
-   return (
-      <Stack gap={5} className="h-100 justify-content-center mx-5">
-         {isLoggedIn ? (
-            <Dashboard />
-         ) : (
-            <>
-               <Row>
-                  <LoginHeader />
-               </Row>
-               <Row>
-                  <LoginForm />
-               </Row>
-            </>
-         )}
+   return true ? (
+      <Dashboard />
+   ) : (
+      <Stack gap={5} className="h-100 mx-5">
+         <Row>
+            <LoginHeader />
+         </Row>
+         <Row>
+            <LoginForm />
+         </Row>
       </Stack>
    );
 };
