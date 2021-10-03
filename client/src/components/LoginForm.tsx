@@ -49,10 +49,10 @@ const LoginForm: React.FC<any> = () => {
       }
    };
    return (
-      <Form onSubmit={handleSubmit} className="w-100">
+      <Form onSubmit={handleSubmit} className="w-100 text-light">
          <Form.Group className="mb-2">
             <Form.Label>
-               Create your <span className="fw-bold">Stand!</span>
+               Create your <span className="fw-bold">Account.</span>
             </Form.Label>
             <Form.Control
                type="text"
@@ -61,13 +61,10 @@ const LoginForm: React.FC<any> = () => {
                required
             />
          </Form.Group>
-         <Button type="submit" className="me-2">
+         <Button variant="secondary" type="submit" className="me-2">
             Login
          </Button>
-         <Button
-            onClick={handleRandomUsernameClick}
-            variant="outline-secondary"
-         >
+         <Button onClick={handleRandomUsernameClick} variant="outline-primary">
             Generate random name!
          </Button>
       </Form>

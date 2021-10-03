@@ -4,8 +4,8 @@ $primary: #004346ff;
 $secondary: #74b3ceff;
 $danger: #fe5f55;
 $warning: #ffc971;
-$dark: shade-color(#172a3aff, 10);
-$light: tint-color(#09bc8aff, 10);
+$dark: shade-color(#172a3aff, 40);
+$light: tint-color(#09bc8aff, 80);
 $body-bg: #f7fffe;
 
 @import '../node_modules/bootstrap/scss/variables';
@@ -15,4 +15,16 @@ $body-bg: #f7fffe;
 
 #root {
    height: 100vh;
+
+   &.dark {
+      background-image: linear-gradient(
+         130deg,
+         $dark 0%,
+         $dark 42%,
+         $light 42%,
+         $light 49%,
+         $dark 49%,
+         $dark 100%
+      );
+   }
 }
