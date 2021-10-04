@@ -8,6 +8,7 @@ import {
    TabContainer,
    TabContent,
    TabPane,
+   Button,
 } from 'react-bootstrap';
 
 const USERS_TAB = 'users',
@@ -21,17 +22,15 @@ const Sidebar: FC = (props) => {
             <Nav variant="tabs" className="justify-content-between text-center">
                <NavItem className="flex-grow-1">
                   <NavLink
-                     className="rounded-0 pointer-event"
+                     className="rounded-0"
                      eventKey={USERS_TAB}
+                     as={Button}
                   >
                      Users
                   </NavLink>
                </NavItem>
                <NavItem className="flex-grow-1">
-                  <NavLink
-                     className="rounded-0 pointer-event"
-                     eventKey={ROOMS_TAB}
-                  >
+                  <NavLink className="rounded-0" eventKey={ROOMS_TAB}>
                      Rooms
                   </NavLink>
                </NavItem>
