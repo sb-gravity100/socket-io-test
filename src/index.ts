@@ -14,7 +14,7 @@ import { Server } from 'socket.io';
 import { SocketEvents } from './types';
 import _ from 'lodash';
 import { execSync } from 'child_process';
-import { socketDb } from './db';
+import * as db from './db';
 import ApiRoute from './routes/api';
 import cors from 'cors';
 
@@ -29,12 +29,12 @@ async function boot() {
    debug('Initializing server...');
 
    const app = express();
-   const serverUrl = execSync('gp url 3000').toString().trim();
+   // const serverUrl = execSync('gp url 3000').toString().trim();
    const server = http.createServer(app);
 
    const io = new Server<SocketEvents>(server, {
       cors: {
-         origin: [serverUrl, 'https://admin.socket.io'],
+         origin: '*',
       },
    });
 
@@ -42,14 +42,39 @@ async function boot() {
    debug('Server listening at %s', SERVER_PORT);
 
    io.on('connection', async (socket) => {
-         debug('Connected: %s', socket.id);
+      let user: any;
+      debug('Connected: %s', socket.handshake.query.username);
+      await db.socket.update(
+         { _id: socket.handshake.query.id },
+         {
+            $set: {
+               socket_id: socket.id,
+               username: socket.handshake.query.username,
+               online: true,
+            },
+         },
+         {
+            upsert: true,
+         }
+      );
 
-         socket.on('disconnect', async () => {
-            debug('Disconnected: %s', socket.id);
-         });
+      // socket.on()
+
+      socket.on('disconnect', async () => {
+         debug('Disconnected: %s', socket.handshake.query.username);
+         await db.socket.update(
+            { _id: socket.handshake.query.id },
+            {
+               $set: {
+                  socket_id: null,
+                  online: false,
+               },
+            }
+         );
+      });
    });
 
-   return { app, server, io }
+   return { app, server, io };
 }
 
 boot()

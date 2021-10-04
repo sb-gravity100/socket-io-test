@@ -4,22 +4,25 @@ import App from './App';
 import store from './store';
 import './index.scss';
 import { Provider } from 'react-redux';
-import socket from './socket';
-import { joinRoom, logOut } from './slices/UserSlice';
+import { logIn, setKey } from './slices/UserSlice';
+import { BrowserRouter } from 'react-router-dom';
 
-socket.on('connect', () => {
-   store.dispatch(joinRoom('public'));
-});
+const id = localStorage.getItem('local-id');
+const username = localStorage.getItem('local-username');
 
-socket.on('connect_error', () => {
-   store.dispatch(logOut());
-});
+if (id) {
+   store.dispatch(setKey('userID', JSON.parse(id)));
+   store.dispatch(setKey('username', JSON.parse(username || '')));
+   store.dispatch(logIn());
+}
 
 ReactDOM.render(
-   <React.StrictMode>
+   // <React.StrictMode>
+   <BrowserRouter>
       <Provider store={store}>
          <App />
       </Provider>
-   </React.StrictMode>,
+   </BrowserRouter>,
+   // </React.StrictMode>
    document.querySelector('#root')
 );

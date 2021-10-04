@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import socket from 'src/socket';
+import { Socket } from 'src/socket';
 import { ChatArgswithRoom } from 'src/types';
 
 type UserState = {
@@ -12,6 +12,7 @@ type UserState = {
       previous?: string;
    };
    isLoggedIn: boolean;
+   socket: Socket;
 };
 
 const initialState = {
@@ -28,20 +29,9 @@ const UserSlice = createSlice({
    reducers: {
       logIn(state) {
          state.isLoggedIn = true;
-         if (!socket.connected) {
-            socket.connect();
-         }
       },
       logOut(state) {
          state.isLoggedIn = false;
-         if (socket.connected) {
-            socket.disconnect();
-         }
-      },
-      joinRoom(state, action: PayloadAction<string>) {
-         state.room.previous = state.room.current;
-         state.room.current = action.payload;
-         socket.emit('join-room', state.room.current);
       },
       setKey<T extends keyof UserState>(
          state: any,
@@ -58,9 +48,13 @@ const UserSlice = createSlice({
             state[action.payload.key as any] = action.payload.value;
          }
       },
-      sendMessage(state, action: PayloadAction<string>) {},
    },
 });
 
-export const { logOut, logIn, joinRoom, setKey } = UserSlice.actions;
+export const setKey = (key: keyof UserState, value: any) =>
+   UserSlice.actions.setKey({
+      key,
+      value,
+   });
+export const { logOut, logIn } = UserSlice.actions;
 export default UserSlice.reducer;

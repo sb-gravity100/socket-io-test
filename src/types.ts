@@ -1,6 +1,3 @@
-import { Socket } from 'socket.io';
-import { DefaultEventsMap } from 'socket.io/dist/typed-events';
-
 export interface IUserStore {
    id: string;
    username?: string;
@@ -26,7 +23,7 @@ interface EmitEvents {
 
 type ListenEvents = {
    message(payload: string, createdAt: Date, cb?: () => void): void;
-   'user-id'(id: string): void;
+   'delete-user'(): void;
 };
 
 export type SocketEvents = EmitEvents & ListenEvents;

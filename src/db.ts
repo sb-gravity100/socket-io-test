@@ -1,7 +1,18 @@
-import Datastore from 'nedb-promises'
-import path from 'path'
+import { DataStoreOptions } from 'nedb';
+import Datastore from 'nedb-promises';
+import path from 'path';
 
-export const socketDb = new Datastore({
-   filename: path.join(process.cwd(), 'db/socket.nedb'),
-   // timestampData: true
-})
+function createDatastore(
+   name: string,
+   root: string = process.cwd(),
+   options?: DataStoreOptions
+) {
+   return new Datastore({
+      filename: path.join(root, name + '.nedb'),
+      ...options,
+   });
+}
+
+export const socket = createDatastore('socket', './db');
+
+export const messages = createDatastore('messages', './db');

@@ -4,34 +4,27 @@ import { useLocalStorage } from 'react-use';
 import { Form, Button } from 'react-bootstrap';
 import { useRandomUsername } from 'src/hooks';
 import SmolAlert from './SmolAlert';
-import { useDispatch } from 'src/store';
+import { useDispatch, useSelector } from 'src/store';
 import { logIn, setKey } from 'src/slices/UserSlice';
 import { nanoid } from '@reduxjs/toolkit';
+import { Redirect } from 'react-router';
 
 const LoginForm: React.FC<any> = () => {
    const [id, setID] = useLocalStorage<string | undefined>('local-id');
    const [username, setUsername] = useLocalStorage<string | undefined>(
       'local-username'
    );
+   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
    const dispatch = useDispatch();
    const idRef = useRef<HTMLInputElement>();
    const generateUsername = useRandomUsername();
 
+   document.title = 'Login';
+
    useEffect(() => {
       if (id) {
-         dispatch(
-            setKey({
-               key: 'userID',
-               value: id,
-            })
-         );
-         dispatch(
-            setKey({
-               key: 'username',
-               value: username,
-            })
-         );
-         // dispatch(logIn());
+         dispatch(setKey('userID', id));
+         dispatch(setKey('username', username));
       }
    }, [id, username]);
 
@@ -40,7 +33,7 @@ const LoginForm: React.FC<any> = () => {
       setUsername(idRef.current?.value);
       setID(nanoid());
 
-      // dispatch(logIn());
+      dispatch(logIn());
    };
 
    const handleRandomUsernameClick = () => {
@@ -48,6 +41,11 @@ const LoginForm: React.FC<any> = () => {
          idRef.current.value = generateUsername();
       }
    };
+
+   if (isLoggedIn) {
+      return <Redirect to="/app" exact />;
+   }
+
    return (
       <Form onSubmit={handleSubmit} className="w-100 text-light">
          <Form.Group className="mb-2">

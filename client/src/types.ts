@@ -17,12 +17,13 @@ export interface ChatArgs {
 export interface ChatArgswithRoom extends ChatArgs {
    room?: string;
 }
-interface EmitEvents {
+type EmitEvents = {
    chat(chat: ChatArgs | ChatArgswithRoom): void;
-}
+};
 
 type ListenEvents = {
    message(payload: string, createdAt: Date, cb?: () => void): void;
+   'delete-user'(): void;
 };
 
 export type SocketEvents = EmitEvents & ListenEvents;
