@@ -11,6 +11,9 @@ $body-bg: tint-color(#f7fffe, 30);
 $font-main: 'Poppins', sans-serif;
 $font-secondary: 'Oswald', sans-serif;
 
+$bg-1: url('https://unsplash.com/photos/mjC9apK53a8/download?force=true&w=1920');
+$bg-2: url('https://unsplash.com/photos/BtbjCFUvBXs/download?force=true&w=1920');
+
 $fonts: (
    main: $font-main,
    secondary: $font-secondary,
@@ -25,6 +28,24 @@ $themes: (
 );
 
 @import 'scss/login';
+@import 'scss/app';
+
+* {
+   padding: 0;
+   margin: 0;
+   box-sizing: border-box;
+
+   &::after,
+   &::before {
+      box-sizing: border-box;
+   }
+
+   &:focus {
+      outline: none;
+   }
+
+   transition: outline 0.3s;
+}
 
 body {
    font-family: $font-main;
@@ -34,11 +55,31 @@ body {
    height: 100vh;
 }
 
+input {
+   padding: 10px;
+   border: 2px solid $dark;
+   border-radius: 5px;
+   outline: transparentize($secondary, 0.1) auto 0px;
+   outline-offset: 2px;
+
+   &:focus {
+      outline-offset: 2px;
+      outline: transparentize($secondary, 0.1) auto 10px;
+      border: 2px solid transparentize($dark, 0.3);
+   }
+
+   &::placeholder {
+      font-size: 1rem;
+   }
+   transition: 0.2s;
+}
+
 button {
    background: transparent;
    padding: 5px 10px;
    border: none;
    cursor: pointer;
+   transition: 0.2s;
 
    &:hover {
       filter: brightness(107%);
@@ -46,12 +87,29 @@ button {
 }
 
 @each $name, $val in $themes {
-   button.btn-#{$name} {
+   .btn-#{$name} {
       background: $val;
       @if isLight($val) {
          color: $dark;
       } @else {
          color: #fefefe;
+      }
+
+      &:hover {
+         background: tint-color($val, 10);
+      }
+   }
+
+   .btn-outline-#{$name} {
+      border: 2px solid $val;
+
+      &:hover {
+         background: $val;
+         @if isLight($val) {
+            color: $dark;
+         } @else {
+            color: #fefefe;
+         }
       }
    }
 

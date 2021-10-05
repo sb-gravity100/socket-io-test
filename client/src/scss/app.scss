@@ -1,0 +1,24 @@
+.app {
+   height: 100%;
+   display: flex;
+
+   .sidebar {
+      flex-basis: 300px;
+      box-shadow: -1px 0px 5px $dark;
+      display: flex;
+      flex-direction: column;
+
+      .logo {
+         flex-basis: 60px;
+         text-align: center;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         box-shadow: 0 3px 5px -3px black;
+      }
+
+      .pane {
+         flex-grow: 1;
+      }
+   }
+}

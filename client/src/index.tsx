@@ -4,8 +4,12 @@ import App from './App';
 import store from './store';
 import { Provider } from 'react-redux';
 import { logIn, setKey } from './slices/UserSlice';
+import TimeAgo from 'javascript-time-ago';
+import en from 'javascript-time-ago/locale/en.json';
 import { BrowserRouter } from 'react-router-dom';
 import './index.scss';
+
+TimeAgo.addDefaultLocale(en);
 
 const id = localStorage.getItem('local-id');
 const username = localStorage.getItem('local-username');

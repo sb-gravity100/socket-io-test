@@ -65,7 +65,7 @@ const LoginForm: React.FC<any> = () => {
                Login
             </button>
             <button
-               className="btn-secondary"
+               className="btn-outline-secondary"
                type="button"
                onClick={handleRandomUsernameClick}
             >
