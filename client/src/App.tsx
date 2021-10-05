@@ -1,5 +1,4 @@
 import { FC, useEffect } from 'react';
-import { Button, Container } from 'react-bootstrap';
 import { Route, Switch } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
 import LoginForm from './components/LoginForm';
@@ -7,30 +6,24 @@ import { SocketProvider } from './socket';
 import { useSelector } from './store';
 
 const Login: FC = () => (
-   <Container className="d-flex flex-column h-100 justify-content-center">
-      <div
-         style={{ top: 0, right: 0 }}
-         className="d-flex gap-2 justify-content-between position-absolute p-3"
-      >
-         <Button variant="light">Docs</Button>
-         <Button variant="light">Devs</Button>
-         <Button variant="light">Contact Us</Button>
+   <div className="area-login-page">
+      <div className="page-buttons">
+         <button>Docs</button>
+         <button>Devs</button>
+         <button>Contact Us</button>
       </div>
-      <div
-         style={{ bottom: 0, right: 0 }}
-         className="position-absolute text-secondary fs-6 p-3"
-      >
-         All Rights Reserved &trade;
+      <div className="main">
+         <div className="logo fs-6 font-secondary letter-1">
+            Messaging <span className="highlight">App</span> Name
+         </div>
+         <LoginForm />
       </div>
-      <div className="fw-bold display-1 text-light">
-         Messaging <span className="text-secondary">App</span> Name
-      </div>
-      <LoginForm />
-   </Container>
+      <div className="fs-1">All Rights Reserved &trade;</div>
+   </div>
 );
 
 const App: FC = () => {
-   const { isLoggedIn, userID, username } = useSelector((state) => state.user);
+   const { userID, username } = useSelector((state) => state.user);
 
    return (
       <Switch>

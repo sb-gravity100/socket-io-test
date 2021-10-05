@@ -1,30 +1,99 @@
-@import '../node_modules/bootstrap/scss/functions';
+@use "sass:math";
+@import 'scss/functions';
 
-$primary: #004346ff;
-$secondary: #74b3ceff;
+$primary: #004346;
+$secondary: #74b3ce;
 $danger: #fe5f55;
 $warning: #ffc971;
-$dark: shade-color(#172a3aff, 40);
-$light: tint-color(#09bc8aff, 80);
-$body-bg: #f7fffe;
+$dark: shade-color(#172a3a, 40);
+$light: tint-color(#09bc8a, 80);
+$body-bg: tint-color(#f7fffe, 30);
+$font-main: 'Poppins', sans-serif;
+$font-secondary: 'Oswald', sans-serif;
 
-@import '../node_modules/bootstrap/scss/variables';
-@import '../node_modules/bootstrap/scss/mixins';
-@import '../node_modules/bootstrap/scss/root';
-@import '../node_modules/bootstrap/scss/bootstrap';
+$fonts: (
+   main: $font-main,
+   secondary: $font-secondary,
+);
+$themes: (
+   'primary': $primary,
+   'secondary': $secondary,
+   'danger': $danger,
+   'warning': $warning,
+   'light': $light,
+   'dark': $dark,
+);
+
+@import 'scss/login';
+
+body {
+   font-family: $font-main;
+}
 
 #root {
    height: 100vh;
+}
 
-   &.dark {
-      background-image: linear-gradient(
-         130deg,
-         $dark 0%,
-         $dark 42%,
-         $light 42%,
-         $light 49%,
-         $dark 49%,
-         $dark 100%
-      );
+button {
+   background: transparent;
+   padding: 5px 10px;
+   border: none;
+   cursor: pointer;
+
+   &:hover {
+      filter: brightness(107%);
+   }
+}
+
+@each $name, $val in $themes {
+   button.btn-#{$name} {
+      background: $val;
+      @if isLight($val) {
+         color: $dark;
+      } @else {
+         color: #fefefe;
+      }
+   }
+
+   .btn-group-#{$name} {
+      button {
+         background: $val;
+         @if isLight($val) {
+            color: $dark;
+         } @else {
+            color: #fefefe;
+         }
+      }
+   }
+
+   .text-#{$name} {
+      color: $val;
+   }
+
+   .bg-#{$name} {
+      background: $val;
+      @if isLight($val) {
+         color: $dark;
+      } @else {
+         color: #fefefe;
+      }
+   }
+}
+
+@each $name, $val in $fonts {
+   .font-#{$name} {
+      font-family: $val;
+   }
+}
+
+@for $num from 1 to 7 {
+   .fs-#{$num} {
+      font-size: 4rem * math.div($num, 6.5);
+   }
+}
+
+@for $num from 1 to 4 {
+   .letter-#{$num} {
+      letter-spacing: 1.5rem * math.div($num, 3);
    }
 }

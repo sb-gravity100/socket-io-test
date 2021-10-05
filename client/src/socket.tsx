@@ -32,7 +32,7 @@ export const SocketProvider: FC<{
       return () => {
          socket?.close();
       };
-   }, [props.id]);
+   }, [props.id, props.namespace, props.username]);
 
    return (
       <SocketContext.Provider value={socket as any}>

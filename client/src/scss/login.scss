@@ -1,0 +1,53 @@
+.area-login-page {
+   display: flex;
+   flex-direction: column;
+   height: 99%;
+   justify-content: space-between;
+
+   .page-buttons {
+      padding: 5px;
+      align-self: flex-end;
+      display: flex;
+      gap: 10px;
+   }
+
+   .logo {
+      margin-bottom: 10px;
+
+      .highlight {
+         color: $secondary;
+      }
+   }
+
+   .main {
+      align-self: center;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+      form {
+         display: flex;
+         flex-direction: column;
+         gap: 10px;
+
+         input {
+            width: 100%;
+            padding: 5px 10px;
+            margin-top: 10px;
+         }
+
+         .buttons {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 10px;
+
+            button {
+               border-radius: 5px;
+               padding: 10px;
+            }
+         }
+      }
+   }
+}

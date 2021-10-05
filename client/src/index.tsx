@@ -2,10 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import store from './store';
-import './index.scss';
 import { Provider } from 'react-redux';
 import { logIn, setKey } from './slices/UserSlice';
 import { BrowserRouter } from 'react-router-dom';
+import './index.scss';
 
 const id = localStorage.getItem('local-id');
 const username = localStorage.getItem('local-username');

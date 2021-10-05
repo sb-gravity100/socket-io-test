@@ -1,9 +1,7 @@
 /* eslint-disable react/jsx-no-undef */
-import { FormEventHandler, useEffect, useRef } from 'react';
+import { FormEventHandler, MouseEventHandler, useEffect, useRef } from 'react';
 import { useLocalStorage } from 'react-use';
-import { Form, Button } from 'react-bootstrap';
 import { useRandomUsername } from 'src/hooks';
-import SmolAlert from './SmolAlert';
 import { useDispatch, useSelector } from 'src/store';
 import { logIn, setKey } from 'src/slices/UserSlice';
 import { nanoid } from '@reduxjs/toolkit';
@@ -36,7 +34,10 @@ const LoginForm: React.FC<any> = () => {
       dispatch(logIn());
    };
 
-   const handleRandomUsernameClick = () => {
+   const handleRandomUsernameClick: MouseEventHandler<HTMLButtonElement> = (
+      e
+   ) => {
+      e.preventDefault();
       if (idRef.current) {
          idRef.current.value = generateUsername();
       }
@@ -47,25 +48,31 @@ const LoginForm: React.FC<any> = () => {
    }
 
    return (
-      <Form onSubmit={handleSubmit} className="w-100 text-light">
-         <Form.Group className="mb-2">
-            <Form.Label>
-               Create your <span className="fw-bold">Account.</span>
-            </Form.Label>
-            <Form.Control
+      <form onSubmit={handleSubmit}>
+         <div className="main-input">
+            <div>
+               Create your <span className="">Account.</span>
+            </div>
+            <input
                type="text"
                ref={idRef as any}
                placeholder={generateUsername()}
                required
             />
-         </Form.Group>
-         <Button variant="secondary" type="submit" className="me-2">
-            Login
-         </Button>
-         <Button onClick={handleRandomUsernameClick} variant="outline-primary">
-            Generate random name!
-         </Button>
-      </Form>
+         </div>
+         <div className="buttons">
+            <button type="submit" className="btn-primary">
+               Login
+            </button>
+            <button
+               className="btn-secondary"
+               type="button"
+               onClick={handleRandomUsernameClick}
+            >
+               Generate random name!
+            </button>
+         </div>
+      </form>
    );
 };
 
