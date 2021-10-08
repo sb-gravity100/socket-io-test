@@ -4,11 +4,14 @@ import { FC, useEffect, useMemo, useState } from 'react';
 import { Redirect } from 'react-router';
 import { FaUserPlus, FaFolderPlus } from 'react-icons/fa';
 import { useRandomUsername } from 'src/hooks';
-import { useSelector } from 'src/store';
+import { useDispatch, useSelector } from 'src/store';
 import UserPane from './sub/UserPane';
+import { toggleTab } from 'src/slices/UserSlice';
 
 const Sidebar: FC = (props) => {
    const generateNames = useRandomUsername();
+   const { tab } = useSelector((state) => state.user);
+   const dispatch = useDispatch();
    const MOCK_USERS = useMemo(
       () =>
          _times(20, () => {
@@ -32,25 +35,33 @@ const Sidebar: FC = (props) => {
                Message <span className="text-secondary">App</span> Name
             </div>
             <div className="control-buttons">
-               <div>
-                  <div>Users</div>
+               <div className={tab === 'USERS' ? 'current' : undefined}>
+                  <div onClick={() => tab !== 'USERS' && toggleTab('USERS')}>
+                     Users
+                  </div>
                   <button>
                      <FaUserPlus />
                   </button>
                </div>
-               <div>
-                  <div>Room</div>
+               <div className={tab === 'ROOMS' ? 'current' : undefined}>
+                  <div onClick={() => tab !== 'ROOMS' && toggleTab('ROOMS')}>
+                     Room
+                  </div>
                   <button>
                      <FaFolderPlus />
                   </button>
                </div>
             </div>
          </div>
-         <div className="pane">
-            {MOCK_USERS.map((e, i) => (
-               <UserPane key={i} {...e} />
-            ))}
-         </div>
+         {tab === 'USERS' ? (
+            <div className="pane users">
+               {MOCK_USERS.map((e, i) => (
+                  <UserPane key={i} {...e} />
+               ))}
+            </div>
+         ) : (
+            <div className="pane rooms"></div>
+         )}
       </div>
    );
 };

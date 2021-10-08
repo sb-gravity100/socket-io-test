@@ -12,7 +12,7 @@ type UserState = {
       previous?: string;
    };
    isLoggedIn: boolean;
-   socket: Socket;
+   tab: 'USERS' | 'ROOMS';
 };
 
 const initialState = {
@@ -21,6 +21,7 @@ const initialState = {
       previous: undefined,
       current: undefined,
    },
+   tab: 'USERS',
 } as UserState;
 
 const UserSlice = createSlice({
@@ -48,6 +49,14 @@ const UserSlice = createSlice({
             state[action.payload.key as any] = action.payload.value;
          }
       },
+      toggleTab(state, action: PayloadAction<'USERS' | 'ROOMS'>) {
+         state.tab =
+            typeof action.payload === 'string'
+               ? action.payload
+               : state.tab === 'ROOMS'
+               ? 'USERS'
+               : 'ROOMS';
+      },
    },
 });
 
@@ -56,5 +65,5 @@ export const setKey = (key: keyof UserState, value: any) =>
       key,
       value,
    });
-export const { logOut, logIn } = UserSlice.actions;
+export const { logOut, logIn, toggleTab } = UserSlice.actions;
 export default UserSlice.reducer;

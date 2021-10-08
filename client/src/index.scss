@@ -15,6 +15,13 @@ $font-secondary: 'Oswald', sans-serif;
 $bg-1: url('https://unsplash.com/photos/mjC9apK53a8/download?force=true&w=1920');
 $bg-2: url('https://unsplash.com/photos/BtbjCFUvBXs/download?force=true&w=1920');
 
+$dirs: (
+   l: 'left',
+   r: 'right',
+   t: 'top',
+   b: 'bottom',
+);
+
 $fonts: (
    main: $font-main,
    secondary: $font-secondary,
@@ -28,9 +35,6 @@ $themes: (
    'dark': $dark,
    'success': $success,
 );
-
-@import 'scss/login';
-@import 'scss/app';
 
 * {
    padding: 0;
@@ -169,8 +173,62 @@ button {
    }
 }
 
+@for $num from 1 to 11 {
+   $div: 6.5;
+   .p-#{$num} {
+      padding: 4rem * math.div($num, $div);
+   }
+
+   .px-#{$num} {
+      padding-left: 4rem * math.div($num, $div);
+      padding-right: 4rem * math.div($num, $div);
+   }
+
+   .py-#{$num} {
+      padding-top: 4rem * math.div($num, $div);
+      padding-bottom: 4rem * math.div($num, $div);
+   }
+
+   .m-#{$num} {
+      margin: 4rem * math.div($num, $div);
+   }
+
+   .mx-#{$num} {
+      margin-left: 4rem * math.div($num, $div);
+      margin-right: 4rem * math.div($num, $div);
+   }
+
+   .my-#{$num} {
+      margin-top: 4rem * math.div($num, $div);
+      margin-bottom: 4rem * math.div($num, $div);
+   }
+
+   @each $n, $n2 in $dirs {
+      .p#{$n}-#{$num} {
+         padding-#{$n2}: 4rem * math.div($num, $div);
+      }
+
+      .m#{$n}-#{$num} {
+         margin-#{$n2}: 4rem * math.div($num, $div);
+      }
+   }
+}
+
+.px-auto {
+   margin-left: auto;
+   margin-right: auto;
+}
+
+.py-auto {
+   margin-top: auto;
+   margin-bottom: auto;
+}
+
 @for $num from 1 to 4 {
    .letter-#{$num} {
       letter-spacing: 1.5rem * math.div($num, 3);
    }
 }
+
+@import 'scss/login';
+@import 'scss/app';

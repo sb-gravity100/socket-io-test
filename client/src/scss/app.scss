@@ -24,6 +24,25 @@
          svg {
             color: $dark;
          }
+
+         .control-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            div {
+               flex-grow: 1;
+               display: flex;
+               align-items: center;
+               padding: 4px;
+               cursor: pointer;
+            }
+
+            .current {
+               cursor: default;
+               background: $secondary;
+            }
+         }
       }
 
       .pane {
